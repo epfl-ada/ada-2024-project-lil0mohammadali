@@ -1,3 +1,4 @@
+import numpy as np
 import polars as pl
 from matplotlib import pyplot as plt
 from scipy import stats
@@ -88,7 +89,7 @@ def normalize_vids_with_timeseries (df_vid, df_timeseries, feature_to_divide_by)
     
     grouped_ts = df_timeseries.group_by('channel_id').mean()[['channel_id',feature_to_divide_by]]
     merged = df_vid.join(grouped_ts, on='channel_id')
-    return merged.with_columns(pl.col(['dislike_count','duration','like_count','view_count']) / merged[feature_to_divide_by])
+    return merged.with_columns(pl.col(['dislike_count','duration','like_count','view_count','num_comms']) / merged[feature_to_divide_by])
 
 def ttest_between_events (statistic_event1, statistic_event2):
     event1 = statistic_event1
@@ -130,3 +131,30 @@ def compare_video_statistics_between_events (videos_1, videos_2):
     print ('Average number of views for each video in event 2 : ', v_means_2['view_count'].sum())
     print ('Difference average number of views for each video from event 1 to event 2 : ', v_means_1['view_count'].sum() - v_means_2['view_count'].sum())
     return pl.concat([v_means_1,v_means_2]).insert_column(0,pl.Series(['event_1','event_2']))
+
+def plot_covariance (df, titlecov, titlehist):
+    cov = np.cov(df.drop('channel_id').drop_nulls())
+    plt.imshow(cov)
+    plt.colorbar()
+    plt.title(titlecov)
+    plt.tight_layout()
+    plt.show()
+
+    #plot histogram of correlations to know how to evaluate the data.
+    plt.hist(cov.flatten())
+    plt.yscale('log')
+    plt.title(titlehist)
+    plt.ylabel('Log count')
+    plt.xlabel('Covariance')
+    plt.show()
+    
+    return cov
+
+def get_correlated_channels (df, threshold):
+    cov = np.cov(df.drop('channel_id').drop_nulls()) 
+    
+    first_correlated_channel = df[np.where(np.tri(len(cov), k=-1) * cov > threshold)[0]]
+    second_correlated_channel = df[np.where(np.tri(len(cov), k=-1) * cov > threshold)[1]]
+
+    correlated_channels = first_correlated_channel.insert_column(1,second_correlated_channel[:,0].rename('channel_id_2'))[['channel_id','channel_id_2']]
+    return correlated_channels.rename({'channel_id':'channel_id_1'})
