@@ -61,7 +61,7 @@ def Ftest_between_two_channels (df, channel_id_1, channel_id_2, variable, channe
     ch_2 = ch_2.drop_nans()
     return stats.f_oneway(ch_1, ch_2)
 
-def plot_video_variables_for_video_dataset (df_vid, channel_id):
+def plot_video_characteristics_for_given_channel (df_vid, channel_id):
     '''plot distribution of different variables for a given channel'''
 
     channel = df_vid.filter(pl.col('channel_id') == channel_id)
@@ -69,21 +69,17 @@ def plot_video_variables_for_video_dataset (df_vid, channel_id):
     if (len((df_vid['channel_id'] == channel_id).unique()) == 1):
         return "Invalid channel id"
 
-    titles = ['dislike_count','duration','like_count','view_count']
-    xlabels = ['Number of dislikes per video','Length of the video [s]', 'Number of likes per video', 'Number of views per video']
+    titles = ['dislike_count','duration','like_count','view_count', 'num_comms']
+    xlabels = ['Number of dislikes per video','Length of the video [s]', 'Number of likes per video', 'Number of views per video', 'Number of comments per video']
 
-    f,a = plt.subplots(2,2,)
-    a = a.ravel()
-    for idx,ax in enumerate(a):
-        ax.hist(channel[titles[idx]])
-        ax.set_title(titles[idx])
-        ax.set_xlabel(xlabels[idx])
-        ax.set_ylabel('Count')
-        ax.set_yscale('log')
-        #ax.set_xscale('log')
-        
-    plt.tight_layout()
-    plt.show()
+    for i in range(len(titles)):
+        plt.hist(channel[titles[i]])
+        plt.title(titles[i])
+        plt.xlabel(xlabels[i])
+        plt.ylabel('Count')
+        plt.yscale('log')
+        plt.tight_layout()
+        plt.show()
     
 def normalize_vids_with_timeseries (df_vid, df_timeseries, feature_to_divide_by):
     
@@ -99,8 +95,6 @@ def ttest_between_events (statistic_event1, statistic_event2):
     event2 = statistic_event2
     event1 = event1.drop_nulls()
     event2 = event2.drop_nulls()
-    event1 = event1.drop_nans()
-    event2 = event2.drop_nans()
     return stats.ttest_ind(event1,event2)
 
 def Ftest_between_events (statistic_event1, statistic_event2):
@@ -108,8 +102,6 @@ def Ftest_between_events (statistic_event1, statistic_event2):
     event2 = statistic_event2
     event1 = event1.drop_nulls()
     event2 = event2.drop_nulls()
-    event1 = event1.drop_nans()
-    event2 = event2.drop_nans()
     return stats.f_oneway(event1,event2)
 
 def get_general_vid_statistics(filtered_df, cols_to_keep = ['dislike_count','duration','like_count','view_count']):
@@ -121,3 +113,20 @@ def get_general_vid_statistics(filtered_df, cols_to_keep = ['dislike_count','dur
     medians = filtered_df.median()[cols_to_keep]
     
     return means,stdevs,medians
+
+def compare_overall_vid_count_between_events (vid_count_1,vid_count_2):
+    
+    print ('Total number of videos for event 1 : ', vid_count_1['counts'].sum())
+    print ('Total number of videos for event 2 : ', vid_count_2['counts'].sum())
+    print ('Difference in videos from event 1 to event 2 : ', vid_count_1['counts'].sum() - vid_count_2['counts'].sum())
+    return vid_count_1.join(vid_count_2, on='channel_id').rename({'counts':'counts_1', 'counts_right':'counts_2'})
+
+def compare_video_statistics_between_events (videos_1, videos_2):
+    
+    v_means_1,v_stdevs_1,v_medians_1 = get_general_vid_statistics(videos_1)
+    v_means_2,v_stdevs_2,v_medians_2 = get_general_vid_statistics(videos_2)
+    
+    print ('Average number of views for each video in event 1 : ', v_means_1['view_count'].sum())
+    print ('Average number of views for each video in event 2 : ', v_means_2['view_count'].sum())
+    print ('Difference average number of views for each video from event 1 to event 2 : ', v_means_1['view_count'].sum() - v_means_2['view_count'].sum())
+    return pl.concat([v_means_1,v_means_2]).insert_column(0,pl.Series(['event_1','event_2']))
