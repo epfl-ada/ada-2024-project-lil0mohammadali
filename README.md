@@ -14,16 +14,17 @@ None
 The Youniverse dataset is big in size. As we only focus on a fraction of the data we propose the following pipeline to get the data we need:
 
 - Get the Channels of Interest (CoI): 
-    - filter out all channels which do not belong to the category _"News & Politics"_. For this we use the `df_channels_en.tsv` dataframe.
-    - We only focus on channels providing News Updates having a highly activity. We only keep the channels with an average activity above *56* (corresponds to 4 videos per day). For this we use timeseries data `the df_timeseries_en.tsv`. 
+    - filter out all channels that do not belong to the category _"News & Politics"_. For this, we use the `df_channels_en.tsv` dataframe.
+    - We only focus on channels providing News Updates having a highly activity. We only keep the channels with an average activity above *56* (corresponds to 4 videos per day for 2 weeks). For this we use timeseries data `the df_timeseries_en.tsv`. 
         - to ease the handling of the big dataframes we do an initial filtering of `yt_metadata.jsonl` with the CoI obtained so far.
-    - even though the authors of the Youniverse dataset already filtered non-english speaking channels it turns out that there are still a important fraction of Hindi and other languages News channel. We filter thus the CoI obtained by the two previous points using a LLM to predict the language of the channel. For this we sample 10 video titles and description and filter the channels which are predicted to be english in less than *60%*. 
+    - even though the authors of the Youniverse dataset already filtered non-english speaking channels it turns out that there is still an important fraction of Hindi and other language News channels. We thus further filter the CoI obtained by the two previous points using OPENAI's CHATGPT API to predict the language of the channel. For this, we sample 5 video titles and descriptions and pass them into a prompt asking the LLM to analyze the text to determine the language of the channel. If any of the 5 videos are labeled non-English, the channel is removed from the dataset. 
+    - we also obtain country information for a majority of the CoI. This was done with the YouTube Data API. Since the channel country only is present, we assume that the country is the same as when the dataset was formed. Around 40-50 channels did not have their country of origin in the API data, so manual verification was performed, by visiting the channel page and/or other social media like X and Facebook, which were linked in the "About" section.
 
-- Get the Videos of Intrest (VoI) 
-    - Only keepp videos from the CoI in `yt_metadata.jsonl`.
-    - For every event get the VoI by searching the title, description and the tags with specific keywords.
+- Get the Videos of Interest (VoI) 
+    - Only keep videos from the CoI in `yt_metadata.jsonl`.
+    - For every event get the VoI by searching the title, description, and tags with specific keywords.
 
-At this point we have reduced the size of all the datafiles (except the comments). 
+At this point, we have reduced the size of all the datafiles (except the comments). 
 
 ## Proposed timeline
 #### Week 1 (26.10.-01.11.):
@@ -32,11 +33,12 @@ At this point we have reduced the size of all the datafiles (except the comments
 
 #### Week 2 (02.11.-8.11.):
 - Filter non-english channels using LLM (🐦Jeffrey)
-- Filter videos with keywords in title and description (🦔Jad)
+- Get country information from channels using Youtube Data API (🐦Jeffrey)
+- Filter videos with keywords in the title and description (🦔Jad)
 
 #### Week 3 (9.11.-15.11.):
 - ReadMe.md file (🐋Lisa)
-- Analysis on video titles (🦖Leonie)
+- Analysis of video titles (🦖Leonie)
 - 
 
 #### Week 4 (30.11.-06.12.):
