@@ -51,18 +51,11 @@ def filter_df_isin(df: pl.DataFrame, column_name: str, values: list|pl.series.se
     
     return df.filter(pl.col(column_name).is_in(values))
 
-# def get_CoI(path_df_channel_en: str, output_path: str):
-#     """
- 
-#     """
-#     df_channels = pl.read_csv(path)
-#     df_filtered = filter_df(df_channels, "category", "News & Politics")
-#     df_filtered.write_csv(output_path)
     
 
 def df_filter_csv_batched(input_path: str, output_path: str, column_name: str, 
                           values: type, filter_method: str,
-                          sep: str = "\t", batch_size=5000):
+                          sep_in: str = "\t", sep_out: str = "\t", batch_size=5000):
     """
     Filter a DataFrame in batches.
     
@@ -73,11 +66,12 @@ def df_filter_csv_batched(input_path: str, output_path: str, column_name: str,
         values: the value(s) to filter the column
         filter_method: The filtring operation. One of 'is_in', '==', '!=', '<', '<=', 
                        '>', '>='.
-        sep: separator used in the csv file. Default "\t".
+        sep_in: separator used in the input csv file. Default "\t".
+        sep_out: separator used in the output csv file. Default "\t".
         batch_size: Sizer per batch. Default 5000
     """
 
-    reader = pl.read_csv_batched(input_path, separator=sep, batch_size=batch_size)
+    reader = pl.read_csv_batched(input_path, separator=sep_in, batch_size=batch_size)
 
     batches = reader.next_batches(5)  
     i = 0
@@ -90,11 +84,11 @@ def df_filter_csv_batched(input_path: str, output_path: str, column_name: str,
                 filtered_df = filter_df(df, column_name, values, cmpstr=filter_method)
 
             if i == 0:
-                filtered_df.write_csv(output_path, include_header=True, separator=sep)
+                filtered_df.write_csv(output_path, include_header=True, separator=sep_out)
             else:
                 with open(output_path, "a") as fh:
                     fh.write(filtered_df.write_csv(file=None, include_header=False, 
-                                                   separator=sep))
+                                                   separator=sep_out))
             i = i+1
             print(f"processing batch {i} ...\r", end='')
         batches = reader.next_batches(5)
