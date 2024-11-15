@@ -69,7 +69,6 @@ def plot_text_len_char(filtered_meta, text):
         video_text = filtered_meta[text].to_pandas()
     else:
         video_text = filtered_meta[text]
-    video_text = filtered_meta[text]
     text_len= video_text.str.len()
     plt.figure()
     plt.hist(text_len, bins= 100, edgecolor='black')
