@@ -4,9 +4,9 @@
 A lot of people use YouTube as their source of news. In this project, we try to look at the news landscape on YouTube and see how the news is reported and how the public engages with it. For this, we analyze big US News Channels to see how they report on different events in the realms of politics, geopolitical conflicts, economic crises, and natural disasters happening in the US, Europe, and Asia. We will analyze if there are any overarching reporting trends or biases between these events, like video style or duration. Then we will look at the public response to these news videos to see if certain video features correlate with more engagement for a specific event. Based on that information we then want to formulate suggestions for what features could lead to a more effective video to start discussions or attract more viewership.
 
 ## Research Questions
-- How do US News Channels report on different events?
-- How does the public respond to different types of videos concerning specific events?
-- How does one make an effective news video for certain types of events?
+- How does the reporting of events by US news channels change with respect to the type of event as well as its location?
+- How is the public's response to an event affected by its nature, location, and video format through which it is presented?
+- How does one make an effective news video to ellicit specific reactions and levels of interaction from the public?
 
 ## Proposed additional datasets
 - We enriched our channel metadata set by adding the country of the channel using the [Youtube API](https://developers.google.com/youtube/v3).
