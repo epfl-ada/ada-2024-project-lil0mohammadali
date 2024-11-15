@@ -547,4 +547,47 @@ def plot_correlation_matrix (df, plot_title):
     
     return cov
     
+def plot_correlation_matrix_features_and_metrics (features_and_metrics):
+    """
+    Plot the correlation matrix for the features and metrics dataframes.
     
+    --------------------------------------------------------
+    Parameters:
+    features and metrics (pd.DataFrame): 
+        The dataframe we want to plot.
+    
+    --------------------------------------------------------    
+    Returns:
+    cov (pl.DataFrame)
+        The covariance matrix for the given dataset
+    """
+    
+    filtered_df = features_and_metrics.select(pl.col(pl.Float64, pl.Int64)).drop_nulls()
+        
+    for i in features_and_metrics.columns : 
+        if i == '':
+            filtered_df = filtered_df.drop('')
+        
+    df_standardized = stats.zscore(pd.DataFrame(filtered_df), axis=1)
+        
+    cov = df_standardized.corr()
+    metrics = filtered_df.columns
+    mask = np.triu(np.ones_like(cov, dtype=bool))
+
+    plt.figure(figsize=(10, 7))
+    fig = sns.heatmap(cov, mask=mask, center=0, annot=True,
+                fmt='.2f', square=True, cmap='RdYlBu')
+
+    fig.set_xticks(np.arange(len(metrics)) + 1/2, labels=metrics)
+    fig.set_yticks(np.arange(len(metrics)) + 1/2, labels=metrics)
+
+    fig.hlines(7, *fig.get_xlim(), colors='black')
+    fig.vlines(7, *fig.get_ylim(), colors='black')
+
+    plt.setp(fig.get_xticklabels(), rotation=45, ha="right",rotation_mode="anchor")
+    plt.setp(fig.get_yticklabels(), rotation=0, ha="right",rotation_mode="anchor")
+
+    plt.title('plot_title')
+    plt.show()
+    
+    return cov
