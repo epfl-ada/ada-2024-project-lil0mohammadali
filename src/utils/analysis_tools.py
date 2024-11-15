@@ -138,10 +138,30 @@ def capitalisation_ratio(text):
     """
     up_count = sum(1 for c in text if c.isupper())
     low_count = sum(1 for c in text if c.islower())
-    #handle edgecases
+    #handle edge cases
     if low_count == 0:
         return float('inf') if up_count > 0 else 0  
     return up_count / low_count
+
+
+def cap_ratio(video_list, text):
+    """returns the ratio of UPPER CASE/lower case letter
+
+    Parameters
+    ----------
+    video_list : pd.df
+        the data frame with the videos that are to be plotted
+    text : str
+        name of the text that we want to analyze. ex: 'title'
+
+     Returns
+    ----------
+    ratios : pd.df
+        a df column that corresponds the the capitalisation ratios   
+    """
+    video_text = video_list[text]
+    ratios = video_text.apply(lambda x: capitalisation_ratio(x))
+    return ratios
 
 def highperformer(video_list, category, percentage=5):
     """returns the list of videos in the upper x percentage in a category
