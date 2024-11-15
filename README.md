@@ -51,7 +51,7 @@ To answer the first question, we look at videos related to each event, getting s
 
 The type of video can be determined by filtering based on certain keywords in the title and description, by searching for specific keywords. We notices that the vast majority of videos that are about live footage include the terms "live" or "live footage" in either the title or description, so that allows us to seperate them from the rest.
 
-With the statistics we can analyze how different events are reported and compare between events based on the locations and event category. 
+With the statistics we can analyze how different events are reported and compare between events based on the locations and event category. Furthermore, by studying the evolution of the upload frequency for different events, we can visualize attention fatigue and determine what affects it and how it changes from event to event by estimating the rate of decrease of the upload frequency.
 
 To answer the second question, we look at data relating to the public response to videos which are: 
 
