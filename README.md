@@ -38,7 +38,7 @@ At this point, we have reduced the size of all the datafiles (except the comment
 
 ### Analysis
 
-The analysis is decomposed into two sections: 1. How does US News report on different events based on category and location? 2. How does the public respond to events?
+The analysis is decomposed into two sections: 1. How does US News report on different events based on category and location? (i.e. studying the reporting side) 2. How does the public respond to events and specific video formats? 
 
 To answer the first question, we look at videos related to each event, getting statistics for: 
 
