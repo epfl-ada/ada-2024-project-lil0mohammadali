@@ -14,19 +14,25 @@ A lot of people use YouTube as their source of news. In this project, we try to 
 ## Methods
 #### Filter the initial data: 
 The Youniverse dataset is big. As we only focus on a fraction of the data we propose the following pipeline to get the data we need:
+Below is a figure describing at a high level the filtering of the channels with a description below
+ ![channel_filter_pipeline](img/channel_filter_pipeline.jpg)
 
 - Get the Channels of Interest (CoI): 
-    - filter out all channels that do not belong to the category _"News & Politics"_. For this, we use the `df_channels_en.tsv` dataframe.
-    - We only focus on channels providing News Updates having a high activity. We only keep the channels with an average activity above *56* (corresponds to 4 videos per day for 2 weeks). For this, we use timeseries data `the df_timeseries_en.tsv`. 
-        - to ease the handling of the big dataframes we do an initial filtering of `yt_metadata.jsonl` with the CoI obtained so far.
+    - filter out all channels that do not belong to the category "News & Politics". For this, we use the df_channels_en.tsv dataframe.
+    - We only focus on channels providing News Updates having a high activity. We only keep the channels with an average activity above 56 (corresponds to 4 videos per day for 2 weeks). For this, we use timeseries data the df_timeseries_en.tsv. 
+        - to ease the handling of the big dataframes we do an initial filtering of yt_metadata.jsonl with the CoI obtained so far.
     - even though the authors of the Youniverse dataset already filtered non-english speaking channels it turns out that there is still an important fraction of Hindi and other language News channels. We thus further filter the CoI obtained by the two previous points using OPENAI's CHATGPT API to predict the language of the channel. For this, we sample 5 video titles and descriptions and pass them into a prompt asking the LLM to analyze the text to determine the channel's language. If any of the 5 videos are labeled non-English, the channel is removed from the dataset. 
     - we also obtain country information for a majority of the CoI. This was done with the YouTube Data API. Since the channel country data was fetched from today, we assume the country is the same as when the dataset was formed. Around 40-50 channels did not have their country of origin in the API data, so manual verification was performed, by visiting the channel page and/or other social media like X and Facebook.
 
 - Get the Videos of Interest (VoI) 
-    - Only keep videos from the CoI in `yt_metadata.jsonl`.
+Below is a figure describing at a high level the filtering of the videos 
+  ![video_filter_pipeline](img/video_filter_pipeline.jpg)
+    - Only keep videos from the CoI in yt_metadata.jsonl.
     - For every event get the VoI by searching the title, description, and tags with specific keywords.
- 
-- Filter out relevant comments using VoI     
+
+- Filter out relevant comments using VoI   
+Below is a figure describing at a high level the filtering of the comments
+    ![comment_filter_pipeline](img/comment_filter_pipeline.jpg)
 
 At this point, we have reduced the size of all the datafiles (except the comments). 
 
