@@ -40,7 +40,6 @@ At this point, we have reduced the size of all the datafiles (except the comment
 
 The analysis is decomposed into two sections: 1. How does US News report on different events based on category and location? 2. How does the public respond to events?
 
-
 To answer the first question, we look at videos related to each event, getting statistics for: 
 
     - video duration
@@ -60,9 +59,9 @@ To answer the second question, we look at data relating to the public response t
     - number of replies to comments
     - ratio of like/dislike
 
-With these statistics, we would like to find correlations between the the data from the first question and use t and f tests to see the significance between statistics from the first question and the second. We can then draw conclusions from the first part and the second part, seeing correlations for duration and views, for example. The goal of this is provide tips for useful features that news companies and NGO's can use to better engage users. 
+We would like to find correlations between the statistic of the first question and those of the public's response (using t and f tests to see the significance of correlation), potentially finding meaningful patterns. The goal of this is provide tips for useful features that news companies and NGO's can use to better engage users. 
 
-Based on the metrics of the public's response we could classify the reaction into two main categories: relatively high view count and low comments/replies to comments, and average views with high comments/replies to comments. The first type would reflect virality and high reach of the video, while the second indicates that the video prompts strong user ungagement, encouraging discussions within the public. We could thereafter determine what format of videos result in high virality vs discussions, and news channels could adapt their videos according to the desired outcome. Like/dislike ratio could also be used to try determining how to potentially minimize division among the public (indicated by a ratio close to 1).
+Based on the metrics of the public's response we could classify the reaction into two main categories: relatively high view count and low comments/replies to comments, and average views with high comments/replies to comments. The first type would reflect virality and high reach of the video, while the second indicates that the video prompts strong user ungagement, encouraging discussions within the public. We could thereafter determine what format of videos result in high virality vs discussions, and news channels could adapt their videos according to the desired outcome. Like/dislike ratio could also be used to try determining how to potentially minimize division among the public (indicated by a ratio close to 1). 
 
 ## Proposed timeline and organization within the team
 #### Week 1 (26.10.-01.11.):
