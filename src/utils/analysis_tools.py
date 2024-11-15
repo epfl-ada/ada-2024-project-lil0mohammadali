@@ -25,9 +25,10 @@ def plot_video_stat(filtered_meta, stat):
     plt.show()
 
 def plot_most_common_words(filtered_meta, text, topX):
-    if isinstance(filtered_meta, pl.DataFrame): # Convert to pandas DataFrame
-        filtered_meta = filtered_meta.to_pandas() #needs "pip install pyarrow" to run
-    video_text = filtered_meta[text]
+    if isinstance(filtered_meta, pl.DataFrame): # if polars convert to pandas 
+        video_text = filtered_meta[text].to_pandas()
+    else:
+        video_text = filtered_meta[text]
     video_text= str.split(video_text.to_string(index=False))
     #filtering
     stop_words = set(stopwords.words('english'))
@@ -46,9 +47,10 @@ def plot_most_common_words(filtered_meta, text, topX):
     plt.show()
 
 def plot_most_common_tags(filtered_meta, topX):
-    if isinstance(filtered_meta, pl.DataFrame): # Convert to pandas DataFrame
-        filtered_meta = filtered_meta.to_pandas() #needs "pip install pyarrow" to run
-    video_text = filtered_meta['tags']
+    if isinstance(filtered_meta, pl.DataFrame): # if polars convert to pandas 
+        video_text = filtered_meta['tags'].to_pandas()
+    else:
+        video_text = filtered_meta['tags']
     video_text= str.split(video_text.to_string(index=False), sep=',')
     video_text= pd.Series(video_text)
     #filtering
@@ -63,8 +65,10 @@ def plot_most_common_tags(filtered_meta, topX):
     plt.show()
 
 def plot_text_len_char(filtered_meta, text):
-    if isinstance(filtered_meta, pl.DataFrame): # Convert to pandas DataFrame
-        filtered_meta = filtered_meta.to_pandas() #needs "pip install pyarrow" to run
+    if isinstance(filtered_meta, pl.DataFrame): # if polars convert to pandas 
+        video_text = filtered_meta[text].to_pandas()
+    else:
+        video_text = filtered_meta[text]
     video_text = filtered_meta[text]
     text_len= video_text.str.len()
     plt.figure()
@@ -77,9 +81,10 @@ def plot_text_len_char(filtered_meta, text):
     plt.show()
 
 def plot_text_len_words(meta, text):
-    if isinstance(meta, pl.DataFrame): # Convert to pandas DataFrame
-        meta = meta.to_pandas() #needs "pip install pyarrow" to run
-    video_text = meta[text]
+    if isinstance(meta, pl.DataFrame): # if polars convert to pandas 
+        video_text = meta[text].to_pandas()
+    else:
+        video_text = meta[text]
     video_text = video_text.astype(str)
     word_count = video_text.apply(lambda x:str.split(x))
     word_count = word_count.apply(lambda x: len(x))
