@@ -65,7 +65,7 @@ def plot_most_common_words(video_list, text, topX):
     plt.ylabel('Frequency')
     top_words.plot(kind='bar', figsize=(20, 8))
     plt.yscale('log')
-    plt.title('Counts of the '+str(topX)+' most common words in video '+text+'excluding stopwords')
+    plt.title('Counts of the '+str(topX)+' most common words in video '+text+' excluding stopwords')
     plt.show()
 
 def plot_most_common_tags(video_list, topX):
