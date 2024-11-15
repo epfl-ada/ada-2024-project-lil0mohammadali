@@ -120,4 +120,44 @@ def plot_text_len_words(video_list, text):
     plt.title('Counts of words in Video '+text)
     plt.show()
 
-# def highperformers(video_list, category, percentage):
+def capitalisation_ratio(text):
+    """returns the ratio of upper case letters to lower case ones
+
+    Parameters
+    ----------
+    text : str
+        the text that we want to analze
+
+    Returns
+    ----------
+    ratio : float
+        the ratio of capitalization
+    """
+    up_count = sum(1 for c in text if c.isupper())
+    low_count = sum(1 for c in text if c.islower())
+    #handle edgecases
+    if low_count == 0:
+        return float('inf') if up_count > 0 else 0  
+    return up_count / low_count
+
+def highperformer(video_list, category, percentage=5):
+    """returns the list of videos in the upper x percentage in a category
+
+    Parameters
+    ----------
+    video_list : pd.df
+        the list of videos to analyse
+    category : str
+        the category in which to rank the videos. ex: 'view_count'
+    percentage : int
+        the perchentage of videos to retrun. ex: 5 resturns the top 5% of videos
+
+    Returns
+    ----------
+    high_perf : pd.df
+        video metadate ranked by the category and with in the top range
+    """
+    video_list[category] = pd.to_numeric(video_list[category], errors='coerce')
+    high_perf = video_list.sort_values(by=category, ascending=False)
+    num_videos = len(video_list)
+    return(high_perf.head(int(round(num_videos*percentage/100))))
