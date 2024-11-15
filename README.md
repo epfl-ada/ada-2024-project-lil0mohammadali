@@ -6,6 +6,7 @@ A lot of people use YouTube as their source for news. In this project we try to 
 ## Research Questions
 - How do US News report on events happening inside the US compared to other events happening in Europe or Asia?
 - How does the report of events differ based on "categories" of events?
+- Do different types of news categories or news videos get more views, or user interactions?
 
 ## Proposed additional datasets
 - We enriched our channels metadata set by adding the country of the channel using the [Youtube API](https://developers.google.com/youtube/v3).
