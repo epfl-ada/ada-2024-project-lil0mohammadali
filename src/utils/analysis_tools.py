@@ -15,7 +15,10 @@ def plot_video_stat(video_list, stat):
     stat : str
         name of the stat that we want to plot. ex: 'view_count'
     """
-    video_stat = video_list[stat].dropna()
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_stat = video_list[stat].to_pandas() #needs "pip install pyarrow" to run
+    else:
+        video_stat = video_list[stat]
     num_stat = pd.to_numeric(video_stat, errors='coerce')
     if stat =='duration':
         num_stat= num_stat/60/60 #convert from seconds to minutes
@@ -40,7 +43,10 @@ def plot_most_common_words(video_list, text, topX):
     topX : int
         number of words to plot. ex: 10 to get the 10 most common words
     """
-    video_text = video_list[text]
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_text = video_list[text].to_pandas() #needs "pip install pyarrow" to run
+    else:
+        video_text = video_list[text]
     video_text= str.split(video_text.to_string(index=False))
     video_text= pd.Series(video_text)
     #filtering
@@ -65,7 +71,10 @@ def plot_most_common_tags(video_list, topX):
     topX : int
         number of tags to plot. ex: 10 to get the 10 most common tags
     """
-    video_text = video_list['tags']
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_text = video_list['tags'].to_pandas() #needs "pip install pyarrow" to run
+    else:
+        video_text = video_list['tags']
     video_text= str.split(video_text.to_string(index=False), sep=',')
     video_text= pd.Series(video_text)
     #filtering
@@ -89,7 +98,10 @@ def plot_text_len_char(video_list, text):
     text : str
         name of the text that we want to plot. ex: 'title'
     """
-    video_text = video_list[text]
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_text = video_list[text].to_pandas() #needs "pip install pyarrow" to run
+    else:
+        video_text = video_list[text]
     text_len= video_text.str.len()
     plt.figure()
     plt.hist(text_len, bins= 100, edgecolor='black')
@@ -110,7 +122,10 @@ def plot_text_len_words(video_list, text):
     text : str
         name of the text that we want to plot. ex: 'title'
     """
-    video_text = video_list[text]
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_text = video_list[text].to_pandas() #needs "pip install pyarrow" to run
+    else:
+        video_text = video_list[text]    
     video_text = video_text.astype(str)
     word_count = video_text.apply(lambda x:str.split(x))
     word_count = word_count.apply(lambda x: len(x))
