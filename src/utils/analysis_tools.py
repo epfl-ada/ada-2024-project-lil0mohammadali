@@ -1,4 +1,5 @@
 import pandas as pd
+import polars as pl
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -161,3 +162,21 @@ def highperformer(video_list, category, percentage=5):
     high_perf = video_list.sort_values(by=category, ascending=False)
     num_videos = len(video_list)
     return(high_perf.head(int(round(num_videos*percentage/100))))
+
+
+def comment_replies_metrics(df: pl.DataFrame) -> pl.DataFrame:
+    """
+    Computes the average, median, 25% and 75% quartile of the replies per video
+    Args:
+        - df: The comments dataset
+    """
+    assert df.columns == ['author', 'video_id', 'likes', 'replies'], "please provide "\
+        "dataset with the columns ['author', 'video_id', 'likes', 'replies']"
+    grouped_df = df.group_by(by="video_id").agg(pl.col('replies').mean().name.suffix("_mean"), 
+                                        pl.col('replies').count().name.suffix("_num"), 
+                                        pl.col('replies').median().name.suffix("_median"),
+                                        pl.col('replies').quantile(0.25, interpolation = "midpoint").name.suffix("_25"),
+                                        pl.col('replies').quantile(0.75, interpolation = "midpoint").name.suffix("_75"),
+                                        )
+    grouped_df = grouped_df.rename({"by": "video_id"})
+    return grouped_df
