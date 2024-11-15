@@ -159,9 +159,10 @@ def cap_ratio(video_list, text):
     ratios : pd.df
         a df column that corresponds the the capitalisation ratios   
     """
-    video_text = video_list[text]
-    ratios = video_text.apply(lambda x: capitalisation_ratio(x))
-    return ratios
+    video_list = video_list.with_columns(
+    pl.col(text).map_elements(capitalisation_ratio).alias("capitalisation_ratio")
+    )
+    return video_list
 
 def highperformer(video_list, category, percentage=5):
     """returns the list of videos in the upper x percentage in a category
