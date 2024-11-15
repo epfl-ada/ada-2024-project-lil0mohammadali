@@ -73,15 +73,14 @@ Based on the metrics of the public's response we could classify the reaction int
 #### Week 2 (02.11.-8.11.):
 - Filter channels by activity (🐋Lisa)
 - Filter non-english channels using LLM (🐦Jeffrey)
-- Prepare a list of keywords for selected events (🦔Jad)
+- Prepare a list of keywords that would isolate specific events and filter out the related videos by searching in title and description (🦔Jad)
 - Prepare statistical test pipeline (🦝Samuel)
 - Get country information from channels using Youtube Data API (🐦Jeffrey)
-- Filter videos with keywords in the title and description (🦔Jad)
 
 #### Week 3 (9.11.-15.11.):
 - ReadMe.md file (🐋Lisa)
 - Analysis of video titles (🦖Leonie)
-- Filter videos with keywords in the title and description (🦔Jad)
+- Study of the upload frequency evolution for each event(🦔Jad)
 - Filter the comments dataset on AWS (🐦Jeffrey)
 - Correlation matrix over different values (🦝Samuel)
 
