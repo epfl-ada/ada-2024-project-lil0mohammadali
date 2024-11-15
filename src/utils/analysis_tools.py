@@ -4,6 +4,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import stats
 import seaborn as sns
+from nltk.corpus import stopwords #needs 'pip install nltk'
+import nltk
+nltk.download('stopwords')
 
 def plot_video_stat(video_list, stat):
     """plots histogramms of number based video stats
@@ -15,7 +18,10 @@ def plot_video_stat(video_list, stat):
     stat : str
         name of the stat that we want to plot. ex: 'view_count'
     """
-    video_stat = video_list[stat].dropna()
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_stat = video_list[stat].to_pandas() #needs "pip install pyarrow" to run
+    else:
+        video_stat = video_list[stat]
     num_stat = pd.to_numeric(video_stat, errors='coerce')
     if stat =='duration':
         num_stat= num_stat/60/60 #convert from seconds to minutes
@@ -40,19 +46,26 @@ def plot_most_common_words(video_list, text, topX):
     topX : int
         number of words to plot. ex: 10 to get the 10 most common words
     """
-    video_text = video_list[text]
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_text = video_list[text].to_pandas() 
+    else:
+        video_text = video_list[text]
     video_text= str.split(video_text.to_string(index=False))
     video_text= pd.Series(video_text)
     #filtering
-    filtered = video_text[video_text.str.len() > 3] #remove prepostions
+    stop_words = set(stopwords.words('english'))
+    filtered = [token for token in video_text if token.lower() not in stop_words]
+    filtered = pd.Series(filtered)
+    filtered = filtered.str.replace('.','')
     filtered = filtered.str.lower() #remove duplicates with different capitalisation
+    filtered = filtered[filtered.str.len() > 1] #remove prepostions
     top_words = filtered.value_counts().head(topX)
     plt.figure()
     plt.xlabel(str(topX)+' most common words in video '+text)
     plt.ylabel('Frequency')
     top_words.plot(kind='bar', figsize=(20, 8))
     plt.yscale('log')
-    plt.title('Counts of the '+str(topX)+' most common words in video '+text+' with more than 3 letters')
+    plt.title('Counts of the '+str(topX)+' most common words in video '+text+'excluding stopwords')
     plt.show()
 
 def plot_most_common_tags(video_list, topX):
@@ -65,7 +78,10 @@ def plot_most_common_tags(video_list, topX):
     topX : int
         number of tags to plot. ex: 10 to get the 10 most common tags
     """
-    video_text = video_list['tags']
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_text = video_list['tags'].to_pandas() 
+    else:
+        video_text = video_list['tags']
     video_text= str.split(video_text.to_string(index=False), sep=',')
     video_text= pd.Series(video_text)
     #filtering
@@ -89,7 +105,10 @@ def plot_text_len_char(video_list, text):
     text : str
         name of the text that we want to plot. ex: 'title'
     """
-    video_text = video_list[text]
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_text = video_list[text].to_pandas() 
+    else:
+        video_text = video_list[text]
     text_len= video_text.str.len()
     plt.figure()
     plt.hist(text_len, bins= 100, edgecolor='black')
@@ -110,7 +129,10 @@ def plot_text_len_words(video_list, text):
     text : str
         name of the text that we want to plot. ex: 'title'
     """
-    video_text = video_list[text]
+    if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
+        video_text = video_list[text].to_pandas() 
+    else:
+        video_text = video_list[text]    
     video_text = video_text.astype(str)
     word_count = video_text.apply(lambda x:str.split(x))
     word_count = word_count.apply(lambda x: len(x))
@@ -180,10 +202,13 @@ def highperformer(video_list, category, percentage=5):
     high_perf : pd.df
         video metadate ranked by the category and with in the top range
     """
-    video_list[category] = pd.to_numeric(video_list[category], errors='coerce')
-    high_perf = video_list.sort_values(by=category, ascending=False)
-    num_videos = len(video_list)
-    return(high_perf.head(int(round(num_videos*percentage/100))))
+    video_list = video_list.with_columns(
+        pl.col(category).cast(pl.Float64, strict=False)  
+    )
+    high_perf = video_list.sort(category, descending=True)
+    num_videos = video_list.height
+    top_n = int(round(num_videos * percentage / 100))
+    return high_perf.head(top_n)
 
 def get_general_ch_statistics(filtered_df, cols_to_keep = ['dislike_count','duration','like_count','view_count','num_comms'], channel = False):
 
