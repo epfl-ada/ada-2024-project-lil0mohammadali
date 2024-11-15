@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import polars as pl
 from matplotlib import pyplot as plt
+from nltk.corpus import stopwords
+import nltk
+nltk.download('stopwords')
+
 
 def plot_video_stat(filtered_meta, stat):
     video_stat = filtered_meta[stat].dropna()
@@ -20,10 +24,13 @@ def plot_video_stat(filtered_meta, stat):
 def plot_most_common_words(filtered_meta, text, topX):
     video_text = filtered_meta[text]
     video_text= str.split(video_text.to_string(index=False))
-    video_text= pd.Series(video_text)
     #filtering
-    filtered = video_text[video_text.str.len() > 3] #remove prepostions
+    stop_words = set(stopwords.words('english'))
+    filtered = [token for token in video_text if token.lower() not in stop_words]
+    filtered = pd.Series(filtered)
+    filtered = filtered.str.replace('.','')
     filtered = filtered.str.lower() #remove duplicates with different capitalisation
+    filtered = filtered[filtered.str.len() > 1] #remove prepostions
     top_words = filtered.value_counts().head(topX)
     plt.figure()
     plt.xlabel(str(topX)+' most common words in video '+text)
@@ -77,14 +84,19 @@ def plot_text_len_words(meta, text):
 def capitalisation_ratio(text):
     up_count = sum(1 for c in text if c.isupper())
     low_count = sum(1 for c in text if c.islower())
-    #handle edgecases
+    #handle edge cases
     if low_count == 0:
         return float('inf') if up_count > 0 else 0  
     return up_count / low_count
+
+def cap_ratio(video_list, text):
+    video_text = video_list[text]
+    return video_text.apply(lambda x: capitalisation_ratio(x))
 
 def highperformer(video_list, category, percentage=5):
     video_list[category] = pd.to_numeric(video_list[category], errors='coerce')
     high_perf = video_list.sort_values(by=category, ascending=False)
     num_videos = len(video_list)
     return(high_perf.head(int(round(num_videos*percentage/100))))
+
 
