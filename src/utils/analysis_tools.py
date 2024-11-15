@@ -90,8 +90,10 @@ def capitalisation_ratio(text):
     return up_count / low_count
 
 def cap_ratio(video_list, text):
-    video_text = video_list[text]
-    return video_text.apply(lambda x: capitalisation_ratio(x))
+    video_list = video_list.with_columns(
+    pl.col(text).map_elements(capitalisation_ratio).alias("capitalisation_ratio")
+    )
+    return video_list
 
 def highperformer(video_list, category, percentage=5):
     video_list[category] = pd.to_numeric(video_list[category], errors='coerce')
