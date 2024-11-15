@@ -4,6 +4,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import stats
 import seaborn as sns
+from nltk.corpus import stopwords #needs 'pip install nltk'
+import nltk
+nltk.download('stopwords')
 
 def plot_video_stat(video_list, stat):
     """plots histogramms of number based video stats
@@ -50,15 +53,19 @@ def plot_most_common_words(video_list, text, topX):
     video_text= str.split(video_text.to_string(index=False))
     video_text= pd.Series(video_text)
     #filtering
-    filtered = video_text[video_text.str.len() > 3] #remove prepostions
+    stop_words = set(stopwords.words('english'))
+    filtered = [token for token in video_text if token.lower() not in stop_words]
+    filtered = pd.Series(filtered)
+    filtered = filtered.str.replace('.','')
     filtered = filtered.str.lower() #remove duplicates with different capitalisation
+    filtered = filtered[filtered.str.len() > 1] #remove prepostions
     top_words = filtered.value_counts().head(topX)
     plt.figure()
     plt.xlabel(str(topX)+' most common words in video '+text)
     plt.ylabel('Frequency')
     top_words.plot(kind='bar', figsize=(20, 8))
     plt.yscale('log')
-    plt.title('Counts of the '+str(topX)+' most common words in video '+text+' with more than 3 letters')
+    plt.title('Counts of the '+str(topX)+' most common words in video '+text+'excluding stopwords')
     plt.show()
 
 def plot_most_common_tags(video_list, topX):
