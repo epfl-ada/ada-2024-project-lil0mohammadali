@@ -44,7 +44,7 @@ def plot_most_common_words(video_list, text, topX):
         number of words to plot. ex: 10 to get the 10 most common words
     """
     if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
-        video_text = video_list[text].to_pandas() #needs "pip install pyarrow" to run
+        video_text = video_list[text].to_pandas() 
     else:
         video_text = video_list[text]
     video_text= str.split(video_text.to_string(index=False))
@@ -72,7 +72,7 @@ def plot_most_common_tags(video_list, topX):
         number of tags to plot. ex: 10 to get the 10 most common tags
     """
     if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
-        video_text = video_list['tags'].to_pandas() #needs "pip install pyarrow" to run
+        video_text = video_list['tags'].to_pandas() 
     else:
         video_text = video_list['tags']
     video_text= str.split(video_text.to_string(index=False), sep=',')
@@ -99,7 +99,7 @@ def plot_text_len_char(video_list, text):
         name of the text that we want to plot. ex: 'title'
     """
     if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
-        video_text = video_list[text].to_pandas() #needs "pip install pyarrow" to run
+        video_text = video_list[text].to_pandas() 
     else:
         video_text = video_list[text]
     text_len= video_text.str.len()
@@ -123,7 +123,7 @@ def plot_text_len_words(video_list, text):
         name of the text that we want to plot. ex: 'title'
     """
     if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
-        video_text = video_list[text].to_pandas() #needs "pip install pyarrow" to run
+        video_text = video_list[text].to_pandas() 
     else:
         video_text = video_list[text]    
     video_text = video_text.astype(str)
