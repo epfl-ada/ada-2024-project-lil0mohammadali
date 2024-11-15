@@ -1,12 +1,12 @@
 
 # The Spread of News during Crisis
 ## Abstract
-A lot of people use YouTube as their source for news. In this project we try to understand how information during crisis is spread on Youtube and how users engage with the content. For this we look at 12 events in 4 categories happening between 2017 and 2019 in the US, Europe and Asia. We analyse the spread of those events by looking at US _News Updates_ channels. 
+A lot of people use YouTube as their source for news. In this project we try look at the news landscape on YouTube and see how the news are reported and how the public engages with it. For this we analyze big US News Channels to see how they report on different events in the realms of politics, geopolitical conflicts, economical crisis and natural disasters happening in the US, Europe and Asia. We will analyze if there are any overarching trends or biases between these events. Then we will look at what the public response is for these news videos in order to see if there are certain video features that correlate with more engagement for a specific event. Based on that information we then want to formulate suggestions for what features lead to a more effective video in for of starting discussions or reaching more people.
 
 ## Research Questions
-- How do US News report on events happening inside the US compared to other events happening in Europe or Asia?
-- How does the report of events differ based on "categories" of events?
-- Do different types of news categories or news videos get more views, or user interactions?
+- How do US News Channels report on different events?
+- How does the public respond to different types of videos concerning specific events?
+- How does one make an effective news video for certain types of events?
 
 ## Proposed additional datasets
 - We enriched our channels metadata set by adding the country of the channel using the [Youtube API](https://developers.google.com/youtube/v3).
