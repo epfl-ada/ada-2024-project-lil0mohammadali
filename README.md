@@ -1,13 +1,14 @@
 
 # The Spread of News during Crisis
 ## Abstract
-YouTube as a Source of News: In this project we try to understand how information during crisis spread on Youtube. For this we look at 12 events in 4 categories happening between 2017 and 2019. We analyse the spread of those events by looking at _News Updates_ channels and are interested in the following questions. 
+A lot of people use YouTube as their source for news. In this project we try to understand how information during crisis is spread on Youtube. For this we look at 12 events in 4 categories happening between 2017 and 2019 in the US, Europe and Asia. We analyse the spread of those events by looking at US _News Updates_ channels.
 
 ## Research Questions
-- 
+- How do US News report on events happening inside the US compared to other events happening in Europe or Asia?
+- How does the report of events differ based on "categories" of events?
 
 ## Proposed additional datasets
-None
+- We enriched our channels metadata set by adding the country of the channel using the [Youtube API](https://developers.google.com/youtube/v3).
 
 ## Methods
 #### Filter the initial data: 
@@ -15,9 +16,9 @@ The Youniverse dataset is big in size. As we only focus on a fraction of the dat
 
 - Get the Channels of Interest (CoI): 
     - filter out all channels which do not belong to the category _"News & Politics"_. For this we use the `df_channels_en.tsv` dataframe.
-    - We only focus on channels providing News Updates having a highly activity. We only keep the channels with an average activity above *56* (corresponds to 4 videos per day). For this we use timeseries data `the df_timeseries_en.tsv`. 
+    - We only focus on channels providing News Updates having a highly activity. We only keep the channels with an average activity above *56* (corresponds to 4 videos per day). For this we use timeseries data the `df_timeseries_en.tsv`. 
         - to ease the handling of the big dataframes we do an initial filtering of `yt_metadata.jsonl` with the CoI obtained so far.
-    - even though the authors of the Youniverse dataset already filtered non-english speaking channels it turns out that there are still a important fraction of Hindi and other languages News channel. We filter thus the CoI obtained by the two previous points using a LLM to predict the language of the channel. For this we sample 10 video titles and description and filter the channels which are predicted to be english in less than *60%*. 
+    - even though the authors of the Youniverse dataset already filtered non-english speaking channels it turns out that there are still a important fraction of Hindi and other languages News channel. We filter thus the CoI obtained by the two previous points using a LLM to predict the language of the channel. For this we sample 5 video titles and description and filter out the channels which have at least one non-english predicted video. 
 
 - Get the Videos of Intrest (VoI) 
     - Only keepp videos from the CoI in `yt_metadata.jsonl`.
@@ -25,32 +26,41 @@ The Youniverse dataset is big in size. As we only focus on a fraction of the dat
 
 At this point we have reduced the size of all the datafiles (except the comments). 
 
-## Proposed timeline
+### 
+
+## Proposed timeline and organization within the team
 #### Week 1 (26.10.-01.11.):
 - Find out how to treat big dataframes (🐋Lisa)
 - Filter channels by category (🐋Lisa)
+- Find each three events in categories geopolitical, natural, economical, political (🦖Leonie🦝Samuel🦔Jad🐦Jeffrey)
 
 #### Week 2 (02.11.-8.11.):
+- Filter channels by activity (🐋Lisa)
 - Filter non-english channels using LLM (🐦Jeffrey)
-- Filter videos with keywords in title and description (🦔Jad)
+- Prepare list of keywords for selected events (🦔Jad)
+- Prepare statistcal test pipeline (🦝Samuel)
 
 #### Week 3 (9.11.-15.11.):
 - ReadMe.md file (🐋Lisa)
 - Analysis on video titles (🦖Leonie)
-- 
+- Filter videos with keywords in title and description (🦔Jad)
+- Filter the comments dataset on AWS (🐦Jeffrey)
+- Correlation matrix over different values (🦝Samuel)
 
 #### Week 4 (30.11.-06.12.):
+- analysis on comments
 
 #### Week 5 (7.11.-13.12.):
+- create interactive plots
+- start html website
 
 #### Week 6 (14.12.-20.12.):
+- conclusion of analysis
 
-
-## Organization within the team
 
 
 ## Questions for TAs
-
+- When we try to compare between different event types, the actual number of events per category which is feasible to analyse, is very small (three in our case). We are afraid that due to this small number, our analysis will be very sensitive to the events we chose and a general conclusion will likely be very biased. Would it be better if we only focus on one type of events (i.e. geopolitical) and analyse more events?
 
 ## Quickstart
 
