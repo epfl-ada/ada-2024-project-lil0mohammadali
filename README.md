@@ -36,7 +36,7 @@ Below is a figure describing at a high level the filtering of the comments
 
 At this point, we have reduced the size of all the datafiles (except the comments). 
 
-### Analysis
+#### Analysis
 
 The analysis is decomposed into two sections: 1. How does US News report on different events based on category and location? (i.e. studying the reporting side) 2. How does the public respond to events and specific video formats? 
 
