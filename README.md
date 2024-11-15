@@ -37,7 +37,9 @@ Below is a figure describing at a high level the filtering of the comments
 At this point, we have reduced the size of all the datafiles (except the comments). 
 
 ### Analysis
-The analysis is decomposed into two sections: 1. How does US News report on different events? 2. How does the public respond to events?
+
+The analysis is decomposed into two sections: 1. How does US News report on different events based on category and location? 2. How does the public respond to events?
+
 
 To answer the first question, we look at videos related to each event, getting statistics for: 
 
@@ -46,6 +48,8 @@ To answer the first question, we look at videos related to each event, getting s
     - formatting of the title with capitalization 
     - subscribers at time of upload
     - frequency of video uploads at the time upload
+
+The type of video can be determined by filtering based on certain keywords in the title and description, by searching for specific keywords. We notices that the vast majority of videos that are about live footage include the terms "live" or "live footage" in either the title or description, so that allows us to seperate them from the rest.
 
 With the statistics we can analyze how different events are reported and compare between events based on the locations and event category. 
 
@@ -56,7 +60,9 @@ To answer the second question, we look at data relating to the public response t
     - number of replies to comments
     - ratio of like/dislike
 
-With these statistics, we would like to find correlations between the the data from the first question and use t and f tests to see the significance between statistics from the first question and the second. We can then draw conclusions from the first part and the second part, seeing correlations for duration and views, for example. The goal of this is provide tips for useful features that news companies can use to better engage users.
+With these statistics, we would like to find correlations between the the data from the first question and use t and f tests to see the significance between statistics from the first question and the second. We can then draw conclusions from the first part and the second part, seeing correlations for duration and views, for example. The goal of this is provide tips for useful features that news companies and NGO's can use to better engage users. 
+
+Based on the metrics of the public's response we could classify the reaction into two main categories: relatively high view count and low comments/replies to comments, and average views with high comments/replies to comments. The first type would reflect virality and high reach of the video, while the second indicates that the video prompts strong user ungagement, encouraging discussions within the public. We could thereafter determine what format of videos result in high virality vs discussions, and news channels could adapt their videos according to the desired outcome. Like/dislike ratio could also be used to try determining how to potentially minimize division among the public (indicated by a ratio close to 1).
 
 ## Proposed timeline and organization within the team
 #### Week 1 (26.10.-01.11.):
@@ -93,51 +99,3 @@ With these statistics, we would like to find correlations between the the data f
 
 ## Questions for TAs
 - When we try to compare between different event types, the actual number of events per category which is feasible to analyse, is very small (three in our case). We are afraid that due to this small number, our analysis will be very sensitive to the events we chose and a general conclusion will likely be very biased. Would it be better if we only focus on one type of event (i.e. geopolitical) and analyse more events?
-
-## Quickstart
-
-```bash
-# clone project
-git clone <project link>
-cd <project repo>
-
-# [OPTIONAL] create conda environment
-conda create -n <env_name> python=3.11 or ...
-conda activate <env_name>
-
-
-# install requirements
-pip install -r pip_requirements.txt
-```
-
-
-
-### How to use the library
-Tell us how the code is arranged, any explanations goes here.
-The helper functions for filtering out country data and checking for english, are found under utils/general_utils.py 
-
-
-
-## Project Structure
-
-The directory structure of new project looks like this:
-
-```
-├── data                        <- Project data files
-│
-├── src                         <- Source code
-│   ├── data                            <- Data directory
-│   ├── models                          <- Model directory
-│   ├── utils                           <- Utility directory
-|   |   ├── general_utils.py
-│   ├── scripts                         <- Shell scripts
-│
-├── tests                       <- Tests of any kind
-│
-├── results.ipynb               <- a well-structured notebook showing the results
-│
-├── .gitignore                  <- List of files ignored by git
-├── pip_requirements.txt        <- File for installing python dependencies
-└── README.md
-```
-
