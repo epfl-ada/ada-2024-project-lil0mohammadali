@@ -20,23 +20,42 @@ def plot_video_stat(filtered_meta, stat):
 def plot_most_common_words(filtered_meta, text, topX):
     video_text = filtered_meta[text]
     video_text= str.split(video_text.to_string(index=False))
-    video_t= pd.Series(video_text)
-    #filtering to remove prepostitions
-    filtered = video_text[video_text.str.len() > 3]
-    filtered = filtered.str.lower()
+    video_text= pd.Series(video_text)
+    #filtering
+    filtered = video_text[video_text.str.len() > 3] #remove prepostions
+    filtered = filtered.str.lower() #remove duplicates with different capitalisation
     top_words = filtered.value_counts().head(topX)
     plt.figure()
+    plt.xlabel(str(topX)+' most common words in video '+text)
+    plt.ylabel('Frequency')
     top_words.plot(kind='bar', figsize=(20, 8))
     plt.yscale('log')
-    plt.title('Counts of words in video '+text+' with more than 10 000 occurrences and more than 3 letters')
+    plt.title('Counts of the '+str(topX)+' most common words in video '+text+' with more than 3 letters')
+    plt.show()
+
+def plot_most_common_tags(filtered_meta, topX):
+    video_text = filtered_meta['tags']
+    video_text= str.split(video_text.to_string(index=False), sep=',')
+    video_text= pd.Series(video_text)
+    #filtering
+    filtered = video_text.str.lower() #remove duplicates with different capitalisation
+    top_words = filtered.value_counts().head(topX)
+    plt.figure()
+    plt.xlabel(str(topX)+' most common tags')
+    plt.ylabel('Frequency')
+    top_words.plot(kind='bar', figsize=(20, 8))
+    plt.yscale('log')
+    plt.title('Counts of the '+str(topX)+' most common words in video tags')
     plt.show()
 
 def plot_text_len_char(filtered_meta, text):
     video_text = filtered_meta[text]
     text_len= video_text.str.len()
     plt.figure()
-    text_len.value_counts().plot(kind='hist', bins=300, figsize=(20, 8))
-    plt.title('distribution of '+text+' length in number of characters')
+    plt.hist(text_len, bins= 100, edgecolor='black')
+    plt.xlabel('Video '+text+'length in number of charaters')
+    plt.ylabel('Frequency')
+    plt.title('distribution of '+text+' length')
     if text=='description':
         plt.yscale('log')
     plt.show()
@@ -47,7 +66,9 @@ def plot_text_len_words(meta, text):
     word_count = video_text.apply(lambda x:str.split(x))
     word_count = word_count.apply(lambda x: len(x))
     plt.figure()
-    word_count.value_counts().plot(kind='hist', bins = 300, figsize=(20, 8))
+    plt.hist(word_count, bins= 100, edgecolor='black')
+    plt.xlabel('Video '+text+' length in number of words')
+    plt.ylabel('Frequency')
     if text=='description':
         plt.yscale('log')
     plt.title('Counts of words in Video '+text)
