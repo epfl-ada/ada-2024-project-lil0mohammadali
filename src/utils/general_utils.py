@@ -25,7 +25,7 @@ def get_channel_country(channel_id):
     
     response = request.execute()
     
-    # Check if the response contains the necessary information
+    # check if the response contains the necessary information
     if "items" in response and len(response["items"]) > 0:
         country = response["items"][0]["snippet"].get("country", "Country not available")
         return country
@@ -88,11 +88,11 @@ def check_channel_english(videos_df, channel_id):
     """
     videos = videos_df.loc[videos_df['channel_id'] == channel_id]
     for index, video in videos.iterrows():
-        # Check if the text is in English using CHATGPT API
+        # check if the text is in English using CHATGPT API
         is_english = check_video_language(video_title=video['title'], video_description=video['description'])
         if not is_english:
             print("channel is not english")
-            return False  # If any video is not English, return False
+            return False  # if any video is not English, return False
         time.sleep(0.5)
     print("channel is english")
-    return True  # If all videos checked are English, return True
+    return True  # if all videos checked are English, return True
