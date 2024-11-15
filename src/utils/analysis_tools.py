@@ -632,3 +632,32 @@ def comment_replies_metrics(df: pl.DataFrame) -> pl.DataFrame:
                                         )
     grouped_df = grouped_df.rename({"by": "video_id"})
     return grouped_df
+
+def filter_by_date(df, col_name, min_date, max_date):
+    """
+    Filter a given dataframe by date.
+    
+    --------------------------------------------------------
+    Parameters:
+    df (pl.DataFrame):
+        dataframe we want to filter
+    
+    col_name (string):
+        name of the column we want to filter by
+    
+    min_date (pl.datetime):
+        minimum date
+        
+    max_date (pl.datetime):
+        maximum date
+    
+    --------------------------------------------------------    
+    Returns:
+    filtered_df (pl.DataFrame)
+        The filtered dataframe.
+    """
+    
+    
+    string_to_date = df.with_columns(pl.col(col_name).str.to_datetime)
+    filtered_df = string_to_date.filter((pl.col(col_name) >= min_date) & (pl.col(col_name) <= max_date))
+    return filtered_df
