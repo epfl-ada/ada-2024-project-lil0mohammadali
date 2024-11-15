@@ -614,3 +614,21 @@ def plot_correlation_matrix_features_and_metrics (features_and_metrics, shift_li
     plt.show()
     
     return cov
+
+
+def comment_replies_metrics(df: pl.DataFrame) -> pl.DataFrame:
+    """
+    Computes the average, median, 25% and 75% quartile of the replies per video
+    Args:
+        - df: The comments dataset
+    """
+    assert df.columns == ['author', 'video_id', 'likes', 'replies'], "please provide "\
+        "dataset with the columns ['author', 'video_id', 'likes', 'replies']"
+    grouped_df = df.group_by(by="video_id").agg(pl.col('replies').mean().name.suffix("_mean"), 
+                                        pl.col('replies').count().name.suffix("_num"), 
+                                        pl.col('replies').median().name.suffix("_median"),
+                                        pl.col('replies').quantile(0.25, interpolation = "midpoint").name.suffix("_25"),
+                                        pl.col('replies').quantile(0.75, interpolation = "midpoint").name.suffix("_75"),
+                                        )
+    grouped_df = grouped_df.rename({"by": "video_id"})
+    return grouped_df
