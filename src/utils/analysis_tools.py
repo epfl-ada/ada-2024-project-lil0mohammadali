@@ -159,9 +159,9 @@ def cap_ratio(video_list, text):
     ratios : pd.df
         a df column that corresponds the the capitalisation ratios   
     """
-    video_text = video_list[text] 
-    ratios = video_text.apply(lambda x: capitalisation_ratio(x))
-    return ratios
+    video_list = video_list.with_columns(
+    pl.col(text).map_elements(capitalisation_ratio).alias("capitalisation_ratio"))
+    return video_list
 
 def highperformer(video_list, category, percentage=5):
     """returns the list of videos in the upper x percentage in a category
@@ -567,7 +567,7 @@ def plot_correlation_matrix (df, plot_title):
     
     return cov
     
-def plot_correlation_matrix_features_and_metrics (features_and_metrics):
+def plot_correlation_matrix_features_and_metrics (features_and_metrics, shift_lines = 8):
     """
     Plot the correlation matrix for the features and metrics dataframes.
     
@@ -575,6 +575,9 @@ def plot_correlation_matrix_features_and_metrics (features_and_metrics):
     Parameters:
     features and metrics (pd.DataFrame): 
         The dataframe we want to plot.
+    
+    shift_lines (int):
+        shifts the black lines separating metrics from features
     
     --------------------------------------------------------    
     Returns:
@@ -601,8 +604,8 @@ def plot_correlation_matrix_features_and_metrics (features_and_metrics):
     fig.set_xticks(np.arange(len(metrics)) + 1/2, labels=metrics)
     fig.set_yticks(np.arange(len(metrics)) + 1/2, labels=metrics)
 
-    fig.hlines(7, *fig.get_xlim(), colors='black')
-    fig.vlines(7, *fig.get_ylim(), colors='black')
+    fig.hlines(shift_lines, *fig.get_xlim(), colors='black')
+    fig.vlines(shift_lines, *fig.get_ylim(), colors='black')
 
     plt.setp(fig.get_xticklabels(), rotation=45, ha="right",rotation_mode="anchor")
     plt.setp(fig.get_yticklabels(), rotation=0, ha="right",rotation_mode="anchor")
