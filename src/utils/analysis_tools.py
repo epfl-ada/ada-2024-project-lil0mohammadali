@@ -175,8 +175,7 @@ def cap_ratio(video_list, text):
         a df column that corresponds the the capitalisation ratios   
     """
     video_list = video_list.with_columns(
-    pl.col(text).map_elements(capitalisation_ratio).alias("capitalisation_ratio")
-    )
+    pl.col(text).map_elements(capitalisation_ratio).alias("capitalisation_ratio"))
     return video_list
 
 def highperformer(video_list, category, percentage=5):
@@ -583,7 +582,53 @@ def plot_correlation_matrix (df, plot_title):
     
     return cov
     
+def plot_correlation_matrix_features_and_metrics (features_and_metrics, shift_lines = 8):
+    """
+    Plot the correlation matrix for the features and metrics dataframes.
     
+    --------------------------------------------------------
+    Parameters:
+    features and metrics (pd.DataFrame): 
+        The dataframe we want to plot.
+    
+    shift_lines (int):
+        shifts the black lines separating metrics from features
+    
+    --------------------------------------------------------    
+    Returns:
+    cov (pl.DataFrame)
+        The covariance matrix for the given dataset
+    """
+    
+    filtered_df = features_and_metrics.select(pl.col(pl.Float64, pl.Int64)).drop_nulls()
+        
+    for i in features_and_metrics.columns : 
+        if i == '':
+            filtered_df = filtered_df.drop('')
+        
+    df_standardized = stats.zscore(pd.DataFrame(filtered_df), axis=1)
+        
+    cov = df_standardized.corr()
+    metrics = filtered_df.columns
+    mask = np.triu(np.ones_like(cov, dtype=bool))
+
+    plt.figure(figsize=(10, 7))
+    fig = sns.heatmap(cov, mask=mask, center=0, annot=True,
+                fmt='.2f', square=True, cmap='RdYlBu')
+
+    fig.set_xticks(np.arange(len(metrics)) + 1/2, labels=metrics)
+    fig.set_yticks(np.arange(len(metrics)) + 1/2, labels=metrics)
+
+    fig.hlines(shift_lines, *fig.get_xlim(), colors='black')
+    fig.vlines(shift_lines, *fig.get_ylim(), colors='black')
+
+    plt.setp(fig.get_xticklabels(), rotation=45, ha="right",rotation_mode="anchor")
+    plt.setp(fig.get_yticklabels(), rotation=0, ha="right",rotation_mode="anchor")
+
+    plt.title('Correlation matrix of features and metrics')
+    plt.show()
+    
+    return cov
 
 
 def comment_replies_metrics(df: pl.DataFrame) -> pl.DataFrame:
