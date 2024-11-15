@@ -195,10 +195,13 @@ def highperformer(video_list, category, percentage=5):
     high_perf : pd.df
         video metadate ranked by the category and with in the top range
     """
-    video_list[category] = pd.to_numeric(video_list[category], errors='coerce')
-    high_perf = video_list.sort_values(by=category, ascending=False)
-    num_videos = len(video_list)
-    return(high_perf.head(int(round(num_videos*percentage/100))))
+    video_list = video_list.with_columns(
+        pl.col(category).cast(pl.Float64, strict=False)  
+    )
+    high_perf = video_list.sort(category, descending=True)
+    num_videos = video_list.height
+    top_n = int(round(num_videos * percentage / 100))
+    return high_perf.head(top_n)
 
 def get_general_ch_statistics(filtered_df, cols_to_keep = ['dislike_count','duration','like_count','view_count','num_comms'], channel = False):
 
