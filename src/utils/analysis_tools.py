@@ -8,7 +8,10 @@ nltk.download('stopwords')
 
 
 def plot_video_stat(filtered_meta, stat):
-    video_stat = filtered_meta[stat].dropna()
+    if isinstance(filtered_meta, pl.DataFrame): # if polars convert to pandas 
+        video_stat = filtered_meta[stat].to_pandas() #needs "pip install pyarrow" to run
+    else:
+        video_stat = filtered_meta[stat]
     num_stat = pd.to_numeric(video_stat, errors='coerce')
     if stat =='duration':
         num_stat= num_stat/60/60 #convert from seconds to minutes
@@ -22,6 +25,8 @@ def plot_video_stat(filtered_meta, stat):
     plt.show()
 
 def plot_most_common_words(filtered_meta, text, topX):
+    if isinstance(filtered_meta, pl.DataFrame): # Convert to pandas DataFrame
+        filtered_meta = filtered_meta.to_pandas() #needs "pip install pyarrow" to run
     video_text = filtered_meta[text]
     video_text= str.split(video_text.to_string(index=False))
     #filtering
@@ -41,6 +46,8 @@ def plot_most_common_words(filtered_meta, text, topX):
     plt.show()
 
 def plot_most_common_tags(filtered_meta, topX):
+    if isinstance(filtered_meta, pl.DataFrame): # Convert to pandas DataFrame
+        filtered_meta = filtered_meta.to_pandas() #needs "pip install pyarrow" to run
     video_text = filtered_meta['tags']
     video_text= str.split(video_text.to_string(index=False), sep=',')
     video_text= pd.Series(video_text)
@@ -56,6 +63,8 @@ def plot_most_common_tags(filtered_meta, topX):
     plt.show()
 
 def plot_text_len_char(filtered_meta, text):
+    if isinstance(filtered_meta, pl.DataFrame): # Convert to pandas DataFrame
+        filtered_meta = filtered_meta.to_pandas() #needs "pip install pyarrow" to run
     video_text = filtered_meta[text]
     text_len= video_text.str.len()
     plt.figure()
@@ -68,6 +77,8 @@ def plot_text_len_char(filtered_meta, text):
     plt.show()
 
 def plot_text_len_words(meta, text):
+    if isinstance(meta, pl.DataFrame): # Convert to pandas DataFrame
+        meta = meta.to_pandas() #needs "pip install pyarrow" to run
     video_text = meta[text]
     video_text = video_text.astype(str)
     word_count = video_text.apply(lambda x:str.split(x))
@@ -96,9 +107,12 @@ def cap_ratio(video_list, text):
     return video_list
 
 def highperformer(video_list, category, percentage=5):
-    video_list[category] = pd.to_numeric(video_list[category], errors='coerce')
-    high_perf = video_list.sort_values(by=category, ascending=False)
-    num_videos = len(video_list)
-    return(high_perf.head(int(round(num_videos*percentage/100))))
+    video_list = video_list.with_columns(
+        pl.col(category).cast(pl.Float64, strict=False)  
+    )
+    high_perf = video_list.sort(category, descending=True)
+    num_videos = video_list.height
+    top_n = int(round(num_videos * percentage / 100))
+    return high_perf.head(top_n)
 
 
