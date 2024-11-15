@@ -1,7 +1,7 @@
 
 # The Spread of News during Crisis
 ## Abstract
-A lot of people use YouTube as their source for news. In this project we try to understand how information during crisis is spread on Youtube. For this we look at 12 events in 4 categories happening between 2017 and 2019 in the US, Europe and Asia. We analyse the spread of those events by looking at US _News Updates_ channels.
+A lot of people use YouTube as their source for news. In this project we try to understand how information during crisis is spread on Youtube and how users engage with the content. For this we look at 12 events in 4 categories happening between 2017 and 2019 in the US, Europe and Asia. We analyse the spread of those events by looking at US _News Updates_ channels. 
 
 ## Research Questions
 - How do US News report on events happening inside the US compared to other events happening in Europe or Asia?
@@ -25,6 +25,8 @@ The Youniverse dataset is big in size. As we only focus on a fraction of the dat
 - Get the Videos of Interest (VoI) 
     - Only keep videos from the CoI in `yt_metadata.jsonl`.
     - For every event get the VoI by searching the title, description, and tags with specific keywords.
+ 
+- Filter out relevant comments using VoI     
 
 At this point, we have reduced the size of all the datafiles (except the comments). 
 
@@ -84,6 +86,7 @@ pip install -r pip_requirements.txt
 
 ### How to use the library
 Tell us how the code is arranged, any explanations goes here.
+The helper functions for filtering out country data and checking for english, are found under utils/general_utils.py 
 
 
 
@@ -98,6 +101,7 @@ The directory structure of new project looks like this:
 │   ├── data                            <- Data directory
 │   ├── models                          <- Model directory
 │   ├── utils                           <- Utility directory
+|   |   ├── general_utils.py
 │   ├── scripts                         <- Shell scripts
 │
 ├── tests                       <- Tests of any kind
