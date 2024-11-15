@@ -159,7 +159,7 @@ def cap_ratio(video_list, text):
     ratios : pd.df
         a df column that corresponds the the capitalisation ratios   
     """
-    video_text = video_list[text]
+    video_text = video_list[text] 
     ratios = video_text.apply(lambda x: capitalisation_ratio(x))
     return ratios
 
@@ -607,7 +607,7 @@ def plot_correlation_matrix_features_and_metrics (features_and_metrics):
     plt.setp(fig.get_xticklabels(), rotation=45, ha="right",rotation_mode="anchor")
     plt.setp(fig.get_yticklabels(), rotation=0, ha="right",rotation_mode="anchor")
 
-    plt.title('plot_title')
+    plt.title('Correlation matrix of features and metrics')
     plt.show()
     
     return cov
