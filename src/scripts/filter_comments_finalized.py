@@ -22,13 +22,12 @@ total_chunks = NUM_ROWS / chunk_size
 # print(video_metadata_df.shape)
 
 for i in range(len(tsv_gz_files)):
-# Path to your .tsv.gz file
     file_path = tsv_gz_files[i]
     print("Currently processing: ", file_path)
     
     start_time = time.time()
 
-    # Create an iterator for processing the file in chunks, set header=None if part is not "aa"
+    # create an iterator for processing the file in chunks, set header=None if part is not "aa"
     chunk_iterator = pd.read_csv(file_path, 
                                 sep='\t',  
                                 compression='gzip',  
@@ -53,13 +52,12 @@ for i in range(len(tsv_gz_files)):
         if chunk_number % 20 == 0:
             print(f"{chunk_number} / {total_chunks} processed" )
             
-    # Stop the timer and calculate elapsed time
+            
+    # print time to process files
     end_time = time.time()
     elapsed_seconds = end_time - start_time
 
-    # Convert elapsed time to hours, minutes, and seconds
     hours, remainder = divmod(elapsed_seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
 
-    # Print the elapsed time in formatted string
     print(f"Total processing time for file {os.path.basename(file_path)}: {int(hours)} hours, {int(minutes)} minutes, {seconds:.2f} seconds")
