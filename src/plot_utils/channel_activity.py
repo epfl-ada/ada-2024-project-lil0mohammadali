@@ -45,7 +45,7 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
                         subplot_titles=("Histogram of average activity (videos/day)", 
                                         f"{nb_channels} channels above cutoff"),
                         specs=[[{"type": "histogram"}, {"type": "table"}]],
-                        column_widths=[0.7, 0.3])
+                        column_widths=[0.5, 0.5])
     fig.add_trace(go.Histogram(x=merged_df['mean_activity'], nbinsx=100, name="Activity Distribution"), row=1, col=1)
 
     fig.update_layout(
