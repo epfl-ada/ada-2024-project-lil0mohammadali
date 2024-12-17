@@ -256,3 +256,47 @@ def plot_update_frequ(index, filtered_df_metadata, all_plots = False, grouping_m
         plt.tight_layout()
         plt.show()
 
+def get_event_metadata (filtered_df_metadata, index):
+    '''
+    Returns the metadata of videos related to a specific event.
+    
+    Parameters:
+    filtered_df_metadata (pl.DataFrame): The filtered metadata DataFrame.
+    index (int): The index of the event in the `titles` list.
+    
+    Returns:
+    pl.DataFrame: The metadata of videos related to the event
+    '''
+    terms = list_of_lists[index]
+    pattern = "(?i)" + "|".join([f"{term}" for term in terms])
+    event_metadata = filtered_df_metadata.filter(
+            (pl.col("description").str.contains(pattern, literal=False)) |
+            (pl.col("title").str.contains(pattern, literal=False))
+        )
+    
+    #add a column to the metadata dataframe that indicates whether the video is live streaming or not
+    event_metadata = add_video_live(event_metadata)
+    
+    return event_metadata
+
+def add_video_live (filtered_df_metadata):
+    """
+    Returns the metadata of videos with a column indicating if they can be considered live streaming.
+    
+    Parameters:
+    filtered_df_metadata (pl.DataFrame): The filtered metadata DataFrame.
+    
+    Returns:
+    pl.DataFrame: The metadata of videos related to live streaming
+    """
+    
+    terms = ["live", "stream", "streaming"]
+    pattern = "(?i)" + "|".join([f"{term}" for term in terms])
+    #add a column to the metadata dataframe that indicates whether the video is a live stream or not based on the title and description
+    new_metadata = filtered_df_metadata.with_columns(pl.col('title').str.contains(pattern).alias('is_live_title'))
+    new_metadata = new_metadata.with_columns(pl.col('description').str.contains(pattern).alias('is_live_description'))
+
+    #combinte the two columns to get a final column that indicates whether the video is a live stream or not
+    new_metadata = new_metadata.with_columns((pl.col('is_live_title') | pl.col('is_live_description')).cast(pl.Int64).alias('is_live').fill_null(0))
+    new_metadata = new_metadata.drop('is_live_title','is_live_description')
+    return new_metadata
