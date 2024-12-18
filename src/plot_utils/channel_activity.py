@@ -1,6 +1,7 @@
 import polars as pl
 from ..scripts import filters
 import plotly.graph_objects as go
+import numpy as np
 from plotly.subplots import make_subplots
 
 def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame, 
@@ -46,12 +47,22 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
                                         f"{nb_channels} channels above cutoff"),
                         specs=[[{"type": "histogram"}, {"type": "table"}]],
                         column_widths=[0.5, 0.5])
-    fig.add_trace(go.Histogram(x=merged_df['mean_activity'], nbinsx=100, 
-                               name="Activity Distribution", ), row=1, col=1)
+    
+    cutoff = 4
 
+    bin_edges = np.linspace(merged_df['mean_activity'].min(), 100, 1000)
+
+    # Define an array of colors where each bin is colored based on whether it is to the left or right of the cutoff
+    colors = ['red' if (bin_edges[i] <= cutoff) else 'blue' for i in range(len(bin_edges) - 1)]
+    fig.add_trace(go.Histogram(x=merged_df['mean_activity'], nbinsx=1000, 
+                               name="Activity Distribution", 
+                               histnorm='percent',
+                               cumulative=dict(enabled=True, direction='decreasing'),
+                               marker=dict(color=colors),), row=1, col=1)
+    
     fig.update_layout(
     xaxis_title="Average nb of videos per day",  # X-axis label
-    yaxis_title="Count",  # Y-axis label
+    yaxis_title="Percentage [%]",  # Y-axis label
 )
 
     # display cutoff line
@@ -59,7 +70,7 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
         shapes=[
             dict(
                 type='line', 
-                x0=4, x1=4, 
+                x0=3.95, x1=3.95, 
                 y0=0, y1=1, 
                 yref='paper',  # The line will extend across the entire plot area
                 line=dict(color='red', dash='dot', width=2),
@@ -77,14 +88,7 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
         )
     )
 
-    # fig.add_trace(go.Scatter(
-    #     x=[None], y=[None],  
-    #     mode='lines',
-    #     name='Cutoff',  
-    #     line=dict(color='red', dash='dot')
-    # ))
-    # log scale for y-axis
-    fig.update_layout(yaxis_type="log")
+    # fig.update_layout(yaxis_type="log")
 
 
     fig.add_trace(go.Table(header=dict(values=['Channel', 'Mean activity']),
