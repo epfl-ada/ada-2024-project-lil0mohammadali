@@ -46,7 +46,8 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
                                         f"{nb_channels} channels above cutoff"),
                         specs=[[{"type": "histogram"}, {"type": "table"}]],
                         column_widths=[0.5, 0.5])
-    fig.add_trace(go.Histogram(x=merged_df['mean_activity'], nbinsx=100, name="Activity Distribution"), row=1, col=1)
+    fig.add_trace(go.Histogram(x=merged_df['mean_activity'], nbinsx=100, 
+                               name="Activity Distribution", ), row=1, col=1)
 
     fig.update_layout(
     xaxis_title="Average nb of videos per day",  # X-axis label
@@ -85,13 +86,15 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
     # log scale for y-axis
     fig.update_layout(yaxis_type="log")
 
+
     fig.add_trace(go.Table(header=dict(values=['Channel', 'Mean activity']),
                     cells=dict(values=[filtered_df_ch['name_cc'], 
                                        filtered_df_ch['mean_activity'].round(0)], 
                                 align='left', 
                                 font=dict(size=12),  
                                 height=30  
-                            )), row=1, col=2)
+                            ),
+                            columnwidth=[0.8, 0.2]), row=1, col=2)
 
 
 
