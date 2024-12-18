@@ -83,8 +83,8 @@ def combine_csv_files_polars(input_directory, output_file):
     print(f"Combined CSV saved to: {output_file}")
 
 def update_csv_header(input_file, output_file, replacement_line):
-    from_file = open("news_videos_filtered_comments.csv", 'r')
-    to_file = open("updated_news_videos_filtered_comments.csv", 'w')
+    from_file = open(input_file, 'r')
+    to_file = open(output_file, 'w')
 
     replacement_line = 'author,video_id,likes,replies\n'
     from_file.readline() # and discard
