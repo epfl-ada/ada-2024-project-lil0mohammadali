@@ -283,12 +283,24 @@ crimea_annexation_keywords = [              # ok
 
 kosovo_serbia_tensions_keywords = [        # not actually clashes??
     # ["Kosovo", "Serbia", "tensions"], 
-    ["border", "clashes"], 
+    # ["border", "clashes"], 
     # ["Kosovo", "Serbia", "conflict"], 
     # ["political", "dispute", "Kosovo"], 
-    # ["Kosovo", "Serbia", "armed", "incidents"], 
-    # ["Kosovo", "territorial", "dispute"],
-    ["kosovo", "serbia"]
+    # ["balkan", "armed", "incidents"], 
+    # ["balkan", "territorial"],
+    # # ["kosovo", "serbia"],
+    # ["kosovo", "serb"],
+    # # ["serbia", "conflict"],
+    # ["kosovo", "crisis"],
+    # ["kosovo", "raid"],
+    # ["kosovo", "tesnsion"],
+    # ["kosovo", "conflict"],
+    # ["balkan", "dispute"],
+    # ["north", "kosovo"],
+    # ["kosovo", "police"],
+    # ["pristina"],
+    # ["kosovo", "border"]
+    ["hungar"]
 ]
 
 # ukraine_conflict_keywords = [               # overlaps with the annexation
@@ -303,9 +315,9 @@ kosovo_serbia_tensions_keywords = [        # not actually clashes??
 kumanovo_keywords = [               # WTF
     ["kumanovo"],
 
-    # ["macedonia", "clash"],
+    ["macedonia", "clash"],
     # ["macedonia", "police"]
-    # ["NLA"],
+    ["NLA", "SDSM"],
     # ["national liberation army"],
 
     # ["SDSM"],
@@ -753,8 +765,8 @@ def plot_update_freq_v4(index, filtered_df_metadata, all_plots=False, grouping_m
             final_condition = build_filter_condition(terms)
             event_metadata = filtered_df_metadata.filter(final_condition)
             
-            if start_date:
-                event_metadata = event_metadata.filter(pl.col("upload_date") > start_date)
+            # if start_date:
+                # event_metadata = event_metadata.filter(pl.col("upload_date") > start_date)
 
             print(f"Related videos found: {event_metadata.shape[0]:,}")
             print("------------")
