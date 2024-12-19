@@ -8,6 +8,8 @@ import seaborn as sns
 # import nltk
 # nltk.download('stopwords')
 from src.utils.keywords import add_video_live
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 def plot_video_stat(video_list, stat):
     """plots histogramms of number based video stats
@@ -881,3 +883,63 @@ def create_response_metrics_df (event_metadata, num_comments):
     response_metrics = response_metrics.filter(pl.col('likes/dislikes') != np.inf)
     
     return response_metrics
+
+
+def plot_correlation_for_groups_of_events(list_of_correlations, list_of_pvalues, x_labels, y_labels, list_of_events): 
+
+    fig = make_subplots(rows=1, cols=2, subplot_titles=["Correlation Coefficients", "p-values"], horizontal_spacing = 0.2)
+
+    fig.update_layout(autosize=False,title="Correlation Matrix of Video Features and Response Metrics", title_x=0.5, title_y=0.9, height=600, width=1400)
+
+
+    buttons = []
+
+    for i in range(len(list_of_events)):
+        corr = list_of_correlations[i][len(x_labels):,:len(x_labels)]
+        pvals = list_of_pvalues[i][len(x_labels):,:len(x_labels)]
+        pvals_significant = (pvals < 0.05)
+
+        fig.add_trace(go.Heatmap(z=corr, x=x_labels, y=y_labels, 
+                                colorscale='RdYlBu', zmid = 0, zmin=-1, zmax=1,
+                                colorbar={"title":"Correlation <br> coefficient", 'x':0.43}, 
+                                hovertemplate = " Response metric : %{y}<br> Feature : %{x}<br> Corelation coefficient: %{z:.2f}<extra></extra>"),
+                                row=1, col=1)
+        
+        fig.add_trace(go.Heatmap(z=pvals, x=x_labels, y=y_labels, 
+                                colorscale= [
+                                [0, 'rgb(250, 50, 50)'],        #0
+                                [0, 'rgb(250, 170, 90)'],        #0
+                                [1./1000, 'rgb(250, 250, 0)'],  #100
+                                [1./100, 'rgb(160, 200, 250)'],  #1000
+                                [1./10, 'rgb(50, 50, 250)'],       #10000
+
+                                ], zmid=0.05, zmin=0, zmax=0.1,
+                                colorbar={"title":"p-value", 'tickvals': [0, 0.025, 0.05, 0.075, 0.1],},
+                                customdata = pvals_significant,
+                                hovertemplate = 'Response metric : %{y}<br>' + 'Feature : %{x}<br>' + '<b>p-value : %{z:.2f}</b><br>'+ '<b>Significant : %{customdata}</b> <extra></extra>',
+                                showlegend = False),
+                                row=1, col=2)  
+
+        buttons.append(dict(args=[{'visible': [False]*i*2+ [True]*2 + [False]*(len(list_of_events)-i-1)*2}], label=list_of_events[i], method="update"))
+
+    initial_visibility = [True]*2 + [False]*(len(list_of_events)-1)*len(list_of_events)*2
+    for i in range(len(fig.data)):
+        fig.data[i].visible = initial_visibility[i]   
+
+
+    fig.update_layout(
+        updatemenus=[
+            dict(
+                buttons=list(buttons),
+                direction="down",
+                pad={"r": 10, "t": 10},
+                showactive=True,
+                x=0,
+                xanchor="right",
+                y=1.15,
+                yanchor="top"
+            )
+        ],
+    )
+
+    fig.show(scrollZoom=False)
