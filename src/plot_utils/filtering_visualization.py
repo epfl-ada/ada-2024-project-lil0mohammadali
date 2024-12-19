@@ -1,6 +1,7 @@
 from plotly import graph_objects as go
 import plotly.express as px
 import pandas as pd
+import numpy as np
 
 def plot_filtering_visualization(y: list, x: list, save_path: str = None, 
                                  show: bool = True):
@@ -39,17 +40,17 @@ def sankey_plot_events(df: pd.DataFrame, save_path: str = None, show: bool = Tru
     Plot a Sankey diagram for the given DataFrame.
     
     Args:
-        df (pl.DataFrame): DataFrame with columns 'event_location', 'event_type', 'eevent_name'
+        df (pl.DataFrame): DataFrame with columns 'region', 'event_type', 'event'
         save_path (str): Path to save the plot as an HTML file
         show (bool): Whether to display the plot
     """
 
-    counts = df.groupby(['event_type', 'event_location', 'event_name']).size().reset_index(name='count')
+    counts = df.groupby(['event_type', 'region', 'event']).size().reset_index(name='count')
 
     labels = ['All Videos from CoI']  # root label
-    event_types = ['geopolitical', 'natural']
-    event_locations = ['asia', 'europe', 'us']
-    event_names = list(counts['event_name'].unique())
+    event_types = np.sort(df['event_type'].unique())
+    event_locations = np.sort(df['region'].unique())
+    event_names = list(counts['event'].unique())
 
     # Add labels for event_types, location and names
     labels.extend(event_types)  
@@ -97,7 +98,7 @@ def sankey_plot_events(df: pd.DataFrame, save_path: str = None, show: bool = Tru
             sources.append(labels.index(event_type))
             targets.append(labels.index(f"{event_location} ({event_type})")) 
             values.append(counts[(counts['event_type'] == event_type) & 
-                                 (counts['event_location'] == event_location)]["count"].sum())
+                                 (counts['region'] == event_location)]["count"].sum())
             if event_type == event_types[0]:
                 link_colors.append(red[i+1]) 
                 node_colors.append(red[i+1])
@@ -110,8 +111,8 @@ def sankey_plot_events(df: pd.DataFrame, save_path: str = None, show: bool = Tru
         for i, event_location in enumerate(event_locations):
             for event_name in event_names:
                 count = counts[(counts['event_type'] == event_type) &
-                            (counts['event_location'] == event_location) &
-                            (counts['event_name'] == event_name)]['count'].sum()
+                            (counts['region'] == event_location) &
+                            (counts['event'] == event_name)]['count'].sum()
                 if count > 0:
                     sources.append(labels.index(f"{event_location} ({event_type})")) 
                     targets.append(labels.index(event_name)) 
