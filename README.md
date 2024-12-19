@@ -45,8 +45,8 @@ To answer the first question, we look at videos related to each event, getting s
     - video duration
     - type of video (live footage/analysis)
     - formatting of the title with capitalization 
-    - subscribers at time of upload
     - frequency of video uploads at the time upload
+    - subjectivity of the title
 
 The type of video can be determined by filtering based on certain keywords in the title and description, by searching for specific keywords. We notices that the vast majority of videos that are about live footage include the terms "live" or "live footage" in either the title or description, so that allows us to seperate them from the rest.
 
@@ -84,16 +84,25 @@ Based on the metrics of the public's response we could classify the reaction int
 - Correlation matrix over different values (🦝Samuel)
 
 #### Week 4 (30.11.-06.12.):
-- analysis on comments
+- Filtering for events (🦔Jad)
+- Improving correlation matrix over different values (🦝Samuel)
+- Filter the comments dataset on AWS (🐦Jeffrey)
+- make the website template (🦖Leonie)
 
 #### Week 5 (7.11.-13.12.):
-- create interactive plots
-- start html website
+- create interactive plots (🐦Jeffrey)
+- creat interactive plots (🐋Lisa)
+- subjectivity score using LLM (🦖Leonie)
+- Filtering for events (🦔Jad)
 
 #### Week 6 (14.12.-20.12.):
-- conclusion of analysis
+- visualisation for video features (🐦Jeffrey)
+- visualisation for pipeline (🐋Lisa)
+- writing (🦖Leonie)
+- classifying videos (🦔Jad)
+- statistical analysis (🦝Samuel)
 
 
 
-## Questions for TAs
-- When we try to compare between different event types, the actual number of events per category which is feasible to analyse, is very small (three in our case). We are afraid that due to this small number, our analysis will be very sensitive to the events we chose and a general conclusion will likely be very biased. Would it be better if we only focus on one type of event (i.e. geopolitical) and analyse more events?
+
+
