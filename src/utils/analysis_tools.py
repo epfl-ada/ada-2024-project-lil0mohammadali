@@ -4,9 +4,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import stats
 import seaborn as sns
-# from nltk.corpus import stopwords #needs 'pip install nltk'
-# import nltk
-# nltk.download('stopwords')
+from nltk.corpus import stopwords #needs 'pip install nltk'
+import nltk
+
 from src.utils.keywords import add_video_live
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -49,6 +49,7 @@ def plot_most_common_words(video_list, text, topX):
     topX : int
         number of words to plot. ex: 10 to get the 10 most common words
     """
+    nltk.download('stopwords')
     if isinstance(video_list, pl.DataFrame): # if polars convert to pandas 
         video_text = video_list[text].to_pandas() 
     else:
