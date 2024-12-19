@@ -114,9 +114,9 @@ hurricane_michael_keywords = [          # ok
 ]
 
 sulawesi_earthquake_tsunami_keywords = [    # ok
-    ["Sulawesi", "earthquake"], 
+    ["Sulawesi", "quake"], 
     ["Sulawesi", "tsunami"], 
-    ["Indonesia", "earthquake"], 
+    ["Indonesia", "quake"], 
     ["Indonesia", "tsunami"], 
 ]
 
@@ -172,9 +172,9 @@ european_floods_2014_keywords = [       # ok
 greek_wildfires_keywords = [            # ok
     ["Athens", "fire"], 
     ["Greece", "fire"],
-    ["Greek", "fire"]
+    ["Greek", "fire"],
+    ["attica", "wildfire"]
 ]
-
 
 italy_earthquakes_keywords = [          # ok
     ["Amatrice", "quake"], 
@@ -293,7 +293,7 @@ titles_environment = [
     "Sulawesi Earthquake and Tsunami (2018)", 
     "Nepal Earthquake (2015)", 
     "Bangladesh Cyclone Mora (2017)", 
-    "India Floods (2018)", 
+    "India Floods in Kerela (2018)", 
 
     # Europe
     "Europe Heatwaves (2019)", 
@@ -349,401 +349,41 @@ def build_filter_condition(terms):
     return final_condition
 
 
-def plot_update_freq_v2(index, filtered_df_metadata, all_plots=False, grouping_mode="daily", event_type = None):
-
-    if not all_plots:
-        # Retrieve terms and title for the given index
-        list_of_lists = list_of_lists_environment + list_of_lists_conflict
-        titles = titles_environment + titles_conflict
-
-        terms = list_of_lists[index]
-        title = titles[index]
-        
-        # Build the filtering condition based on complex terms logic
-        final_condition = build_filter_condition(terms)
-        print(f"Event: {title}")
-
-        event_metadata = filtered_df_metadata.filter(final_condition)
-        print(f"Related videos found: {event_metadata.shape[0]:,}")
-
-        match grouping_mode:
-            case "daily":
-                date_counts = event_metadata.group_by("upload_date").count().sort("upload_date")
-            case "weekly":
-                date_counts = (event_metadata
-                               .with_columns(pl.col("upload_date").dt.truncate("1w").alias("upload_date"))
-                               .group_by("upload_date")
-                               .count()
-                               .sort("upload_date"))
-            case "monthly":
-                date_counts = (event_metadata
-                               .with_columns(pl.col("upload_date").dt.truncate("1mo").alias("upload_date"))
-                               .group_by("upload_date")
-                               .count()
-                               .sort("upload_date"))
-
-        # Plot the histogram
-        plt.figure(figsize=(16, 6))
-        plt.bar(date_counts["upload_date"], date_counts["count"], width=3)  # adjust width
-        plt.xlabel("Date")
-        plt.ylabel("Count")
-        plt.title(f"Upload frequency for videos related to {title}")
-
-        start_date = datetime(2018, 1, 1)
-        end_date = datetime(2018, 12, 1)
-        # plt.xlim(start_date, end_date)
-
-        # Set x-axis ticks to show yearly
-        plt.gca().xaxis.set_major_locator(mdates.YearLocator())
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-        plt.xticks(rotation=90)
-        plt.grid()
-        plt.tight_layout()
-        plt.show()
-
-    else:
-        if event_type == "environment":
-            list_of_lists = list_of_lists_environment
-            titles = titles_environment
-        elif event_type == "conflict":
-            list_of_lists = list_of_lists_conflict
-            titles = titles_conflict
-        else:
-            raise KeyError("wrong event type: \"environment\" or \"conflict\" ")
-
-        # Plot all events in a single figure
-        fig, ax = plt.subplots(len(list_of_lists), 1, figsize=(16, 36), constrained_layout=True)
-        for idx in range(len(list_of_lists)):
-            
-            terms = list_of_lists[idx]
-            title = titles[idx]
-
-            print(f"Event: {title}")
-
-            final_condition = build_filter_condition(terms)
-            event_metadata = filtered_df_metadata.filter(final_condition)
-            print(f"Related videos found: {event_metadata.shape[0]:,}")
-            print("------------")
-
-            match grouping_mode:
-                case "daily":
-                    date_counts = event_metadata.group_by("upload_date").count().sort("upload_date")
-                case "weekly":
-                    date_counts = (event_metadata
-                                   .with_columns(pl.col("upload_date").dt.truncate("1w").alias("upload_date"))
-                                   .group_by("upload_date")
-                                   .count()
-                                   .sort("upload_date"))
-                case "monthly":
-                    date_counts = (event_metadata
-                                   .with_columns(pl.col("upload_date").dt.truncate("1mo").alias("upload_date"))
-                                   .group_by("upload_date")
-                                   .count()
-                                   .sort("upload_date"))
-
-            ax[idx].bar(date_counts["upload_date"], date_counts["count"], width=3)  # adjust width
-            ax[idx].set_xlabel("Date")
-            ax[idx].set_ylabel("Count")
-            ax[idx].set_title(f"Upload frequency for videos related to {title}")
-
-            # Use yearly ticks
-            ax[idx].xaxis.set_major_locator(mdates.YearLocator())
-            ax[idx].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-            plt.setp(ax[idx].xaxis.get_majorticklabels(), rotation=90)
-
-            start_date = datetime(2013, 1, 1)
-            end_date = datetime(2019, 12, 1)
-            ax[idx].set_xlim(start_date, end_date)
-            
-            ax[idx].grid(True)
-
-        plt.show()
-
-def plot_update_freq_v3(index, filtered_df_metadata, all_plots=False, grouping_mode="daily", event_type=None, start_date=None): # added argument start_date
-
-    if not all_plots:
-        # Retrieve terms and title for the given index
-        list_of_lists = list_of_lists_environment + list_of_lists_conflict
-        titles = titles_environment + titles_conflict
-
-        terms = list_of_lists[index]
-        title = titles[index]
-        
-        # Build the filtering condition based on complex terms logic
-        final_condition = build_filter_condition(terms)
-        print(f"Event: {title}")
-
-        event_metadata = filtered_df_metadata.filter(final_condition)
-        
-        # Apply start_date filter if provided
-        if start_date:
-            event_metadata = event_metadata.filter(pl.col("upload_date") > start_date)
-
-        print(f"Related videos found: {event_metadata.shape[0]:,}")
-
-        match grouping_mode:
-            case "daily":
-                date_counts = event_metadata.group_by("upload_date").count().sort("upload_date")
-            case "weekly":
-                date_counts = (event_metadata
-                               .with_columns(pl.col("upload_date").dt.truncate("1w").alias("upload_date"))
-                               .group_by("upload_date")
-                               .count()
-                               .sort("upload_date"))
-            case "monthly":
-                date_counts = (event_metadata
-                               .with_columns(pl.col("upload_date").dt.truncate("1mo").alias("upload_date"))
-                               .group_by("upload_date")
-                               .count()
-                               .sort("upload_date"))
-
-        # Plot the histogram
-        plt.figure(figsize=(16, 6))
-        plt.bar(date_counts["upload_date"], date_counts["count"], width=3)
-        plt.xlabel("Date")
-        plt.ylabel("Count")
-        plt.title(f"Upload frequency for videos related to {title}")
-
-        plt.gca().xaxis.set_major_locator(mdates.YearLocator())
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-        plt.xticks(rotation=90)
-        plt.grid()
-        plt.tight_layout()
-        plt.xlim(datetime(2013, 1, 1), datetime(2019, 12, 1))
-        plt.show()
-
-    else:
-        if event_type == "environment":
-            list_of_lists = list_of_lists_environment
-            titles = titles_environment
-        elif event_type == "conflict":
-            list_of_lists = list_of_lists_conflict
-            titles = titles_conflict
-        else:
-            raise KeyError("wrong event type: \"environment\" or \"conflict\" ")
-
-        fig, ax = plt.subplots(len(list_of_lists), 1, figsize=(16, 36), constrained_layout=True)
-        for idx in range(len(list_of_lists)):
-            terms = list_of_lists[idx]
-            title = titles[idx]
-
-            print(f"Event: {title}")
-
-            final_condition = build_filter_condition(terms)
-            event_metadata = filtered_df_metadata.filter(final_condition)
-            
-            if start_date:
-                event_metadata = event_metadata.filter(pl.col("upload_date") > start_date)
-
-            print(f"Related videos found: {event_metadata.shape[0]:,}")
-            print("------------")
-
-            match grouping_mode:
-                case "daily":
-                    date_counts = event_metadata.group_by("upload_date").count().sort("upload_date")
-                case "weekly":
-                    date_counts = (event_metadata
-                                   .with_columns(pl.col("upload_date").dt.truncate("1w").alias("upload_date"))
-                                   .group_by("upload_date")
-                                   .count()
-                                   .sort("upload_date"))
-                case "monthly":
-                    date_counts = (event_metadata
-                                   .with_columns(pl.col("upload_date").dt.truncate("1mo").alias("upload_date"))
-                                   .group_by("upload_date")
-                                   .count()
-                                   .sort("upload_date"))
-
-            ax[idx].bar(date_counts["upload_date"], date_counts["count"], width=3)
-            ax[idx].set_xlabel("Date")
-            ax[idx].set_ylabel("Count")
-            ax[idx].set_title(f"Upload frequency for videos related to {title}")
-
-            ax[idx].xaxis.set_major_locator(mdates.YearLocator())
-            ax[idx].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-            plt.setp(ax[idx].xaxis.get_majorticklabels(), rotation=90)
-            ax[idx].set_xlim(datetime(2013, 1, 1), datetime(2019, 12, 1))
-            ax[idx].grid(True)
-
-        plt.show()
-
-def plot_update_freq_v4(index, filtered_df_metadata, all_plots=False, grouping_mode="daily", event_type=None, crop_time=False): # added argument crop_time
-
-    event_dates = [
-        [date(2017, 8, 1), date(2018, 7, 31)],  # Hurricane Harvey (2017)
-        [date(2019, 5, 1), date(2019, 4, 30)],  # California Wildfires (2018)
-        [date(2017, 9, 1), date(2018, 8, 31)],  # Hurricane Maria (2017)
-        [date(2018, 9, 1), date(2019, 8, 31)],  # Hurricane Michael (2018)
-
-        [date(2019, 1, 1), date(2019, 12, 31)],  # Sulawesi Earthquake and Tsunami (2018)
-        [date(2015, 4, 1), date(2016, 3, 31)],  # Nepal Earthquake (2015)
-        [date(2017, 5, 1), date(2018, 4, 30)],  # Bangladesh Cyclone Mora (2017)
-        [date(2018, 7, 1), date(2019, 6, 30)],  # India Kerala Floods (2018)
-
-        [date(2019, 5, 1), date(2020, 4, 30)],  # European Heatwaves (2019)
-        [date(2017, 6, 1), date(2018, 5, 31)],  # Portugal Wildfires (2017)
-        [date(2014, 5, 1), date(2015, 4, 30)],  # European Floods (2014)
-        [date(2018, 7, 1), date(2019, 6, 30)],  # Greek Wildfires (2018)
-        [date(2016, 8, 1), date(2017, 7, 31)],  # Italy Earthquakes (2016)
-
-        # Geopolitical Conflicts / Armed Conflicts (US)
-        [date(2016, 10, 1), date(2017, 7, 31)],  # Mosul Offensive (2016-2017) - Iraq
-        [date(2014, 9, 1), date(2015, 3, 31)],  # Battle of Kobani (2014-2015) - Syria
-        [date(2017, 6, 1), date(2017, 10, 31)],  # Battle of Raqqa (June - October 2017) - Syria
-        [date(2015, 9, 1), date(2015, 10, 31)],  # Kunduz City Attack (2015) - Afghanistan
-        [date(2016, 5, 1), date(2016, 12, 31)],  # Battle of Sirte (2016) - Libya
-
-        # Geopolitical Conflicts / Armed Conflicts (Asia)
-        [date(2019, 2, 1), date(2019, 2, 28)],  # "Pulwama attack and Balakot Airstrikes, kashmir conflict (February 2019) - India / Pakistan"
-        [date(2016, 11, 1), date(2019, 12, 31)], # "Syrian Civil War, Aleppo Offensive (2016))",
-        [date(2018, 6, 1), date(2018, 12, 31)],  # Yemeni Civil War, Battle of Hudaydah (June - December 2018)
-
-        # Geopolitical Conflicts / Armed Conflicts (Europe)
-        [date(2014, 2, 1), date(2014, 12, 31)],  # Crimea Annexation and Conflict in Eastern Ukraine (2014)
-        [date(2016, 4, 1), date(2016, 4, 30)],  # Nagorno-Karabakh Conflicts (Clashes (2016)) - Armenia-Azerbaijan
-]
-
-    if not all_plots:
-        # Retrieve terms and title for the given index
-        list_of_lists = list_of_lists_environment + list_of_lists_conflict
-        titles = titles_environment + titles_conflict
-
-        terms = list_of_lists[index]
-        title = titles[index]
-        
-        # Build the filtering condition based on complex terms logic
-        final_condition = build_filter_condition(terms)
-        print(f"Event: {title}")
-
-        event_metadata = filtered_df_metadata.filter(final_condition)
-        
-        if crop_time:
-            event_metadata = event_metadata.filter( (pl.col("upload_date") > event_dates[index][0]) & (pl.col("upload_date") < event_dates[index][1]))
-
-
-        print(f"Related videos found: {event_metadata.shape[0]:,}")
-
-        match grouping_mode:
-            case "daily":
-                date_counts = event_metadata.group_by("upload_date").count().sort("upload_date")
-            case "weekly":
-                date_counts = (event_metadata
-                               .with_columns(pl.col("upload_date").dt.truncate("1w").alias("upload_date"))
-                               .group_by("upload_date")
-                               .count()
-                               .sort("upload_date"))
-            case "monthly":
-                date_counts = (event_metadata
-                               .with_columns(pl.col("upload_date").dt.truncate("1mo").alias("upload_date"))
-                               .group_by("upload_date")
-                               .count()
-                               .sort("upload_date"))
-
-        # Plot the histogram
-        plt.figure(figsize=(16, 6))
-        plt.bar(date_counts["upload_date"], (date_counts["count"]), width=3)
-        plt.xlabel("Date")
-        plt.ylabel("Count")
-        plt.title(f"Upload frequency for videos related to {title}")
-
-        plt.gca().xaxis.set_major_locator(mdates.YearLocator())
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-        plt.xticks(rotation=90)
-        plt.grid()
-        plt.tight_layout()
-        plt.xlim(datetime(2013, 1, 1), datetime(2019, 12, 1))
-        # plt.ylim(0,10)
-        plt.show()
-        return event_metadata       ####
-    else:
-        if event_type == "environment":
-            list_of_lists = list_of_lists_environment
-            titles = titles_environment
-        elif event_type == "conflict":
-            list_of_lists = list_of_lists_conflict
-            titles = titles_conflict
-        else:
-            raise KeyError("wrong event type: \"environment\" or \"conflict\" ")
-
-        fig, ax = plt.subplots(len(list_of_lists), 1, figsize=(16, 36), constrained_layout=True)
-        for idx in range(len(list_of_lists)):
-            terms = list_of_lists[idx]
-            title = titles[idx]
-
-            print(f"Event: {title}")
-
-            final_condition = build_filter_condition(terms)
-            event_metadata = filtered_df_metadata.filter(final_condition)
-            
-            if crop_time:
-                event_metadata = event_metadata.filter( (pl.col("upload_date") > event_dates[idx][0]) & (pl.col("upload_date") < event_dates[idx][1]))
-
-            print(f"Related videos found: {event_metadata.shape[0]:,}")
-            print("------------")
-
-            match grouping_mode:
-                case "daily":
-                    date_counts = event_metadata.group_by("upload_date").count().sort("upload_date")
-                case "weekly":
-                    date_counts = (event_metadata
-                                   .with_columns(pl.col("upload_date").dt.truncate("1w").alias("upload_date"))
-                                   .group_by("upload_date")
-                                   .count()
-                                   .sort("upload_date"))
-                case "monthly":
-                    date_counts = (event_metadata
-                                   .with_columns(pl.col("upload_date").dt.truncate("1mo").alias("upload_date"))
-                                   .group_by("upload_date")
-                                   .count()
-                                   .sort("upload_date"))
-
-            ax[idx].bar(date_counts["upload_date"], date_counts["count"], width=3)
-            ax[idx].set_xlabel("Date")
-            ax[idx].set_ylabel("Count")
-            ax[idx].set_title(f"Upload frequency for videos related to {title}")
-
-            ax[idx].xaxis.set_major_locator(mdates.YearLocator())
-            ax[idx].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-            plt.setp(ax[idx].xaxis.get_majorticklabels(), rotation=90)
-            ax[idx].set_xlim(datetime(2013, 1, 1), datetime(2019, 12, 1))
-            ax[idx].grid(True)
-
-        plt.show()
-
 def plot_update_freq_v5(index, filtered_df_metadata, all_plots=False, grouping_mode="daily", event_type=None, crop_time=False, generate = False): # added argument crop_time
 
     event_dates = [
-        [date(2017, 8, 1), date(2018, 7, 31)],  # Hurricane Harvey (2017)
-        [date(2018, 5, 1), date(2018, 4, 30)],  # California Wildfires (2018)
-        [date(2017, 9, 1), date(2018, 8, 31)],  # Hurricane Maria (2017)
-        [date(2018, 9, 1), date(2019, 8, 31)],  # Hurricane Michael (2018)
+        [date(2017, 8, 1), date(2018, 7, 30)],  # Hurricane Harvey (Aug-Sep 2017)
+        [date(2018, 6, 1), date(2019, 2, 1)],  # California Wildfires (Jul-Nov 2018)
+        [date(2017, 8, 1), date(2018, 9, 1)],  # Hurricane Maria (Sep 2017 - Feb 2018)
+        [date(2018, 9, 1), date(2019, 3, 1)],  # Hurricane Michael (Oct 2018 - Jan 2019)
+        [date(2018, 9, 26), date(2018, 10, 20)],  # Sulawesi Earthquake and Tsunami (Sep-Dec 2018)
 
-        [date(2019, 1, 1), date(2019, 12, 31)],  # Sulawesi Earthquake and Tsunami (2018)
-        [date(2015, 4, 1), date(2016, 3, 31)],  # Nepal Earthquake (2015)
-        [date(2017, 5, 1), date(2018, 4, 30)],  # Bangladesh Cyclone Mora (2017)
-        [date(2018, 7, 1), date(2019, 6, 30)],  # India Kerala Floods (2018)
+        [date(2015, 4, 23), date(2015, 7, 1)],  # Nepal Earthquake (Apr-May 2015)
+        [date(2017, 5, 28), date(2017, 7, 1)],  # Bangladesh Cyclone Mora (May-Jun 2017)
+        [date(2018, 8, 1), date(2018, 8, 31)],  # India Kerala Floods (Aug 2018)
 
-        [date(2019, 5, 1), date(2020, 4, 30)],  # European Heatwaves (2019)
-        [date(2017, 6, 1), date(2018, 5, 31)],  # Portugal Wildfires (2017)
-        [date(2014, 5, 1), date(2015, 4, 30)],  # European Floods (2014)
-        [date(2018, 7, 1), date(2019, 6, 30)],  # Greek Wildfires (2018)
-        [date(2016, 8, 1), date(2017, 7, 31)],  # Italy Earthquakes (2016)
+        [date(2019, 6, 1), date(2019, 8, 31)],  # European Heatwaves (Jun-Aug 2019)
+        [date(2017, 6, 17), date(2017, 10, 31)],  # Portugal Wildfires (Jun-Oct 2017)
+        [date(2014, 5, 10), date(2014, 6, 15)],  # European Floods (May-Jun 2014)
+
+        [date(2018, 7, 20), date(2018, 8, 15)],  # Greek Wildfires (July 2018)
+        [date(2016, 8, 21), date(2016, 9, 15)],  # Italy Earthquakes (2016)
 
         # Geopolitical Conflicts / Armed Conflicts (US)
-        [date(2016, 10, 1), date(2017, 7, 31)],  # Mosul Offensive (2016-2017) - Iraq
-        [date(2014, 9, 1), date(2015, 3, 31)],  # Battle of Kobani (2014-2015) - Syria
-        [date(2017, 6, 1), date(2017, 10, 31)],  # Battle of Raqqa (June - October 2017) - Syria
-        [date(2015, 9, 1), date(2015, 10, 31)],  # Kunduz City Attack (2015) - Afghanistan
-        [date(2016, 5, 1), date(2016, 12, 31)],  # Battle of Sirte (2016) - Libya
+        [date(2016, 10, 13), date(2017, 8, 5)],  # Mosul Offensive (Oct 2016 - Jul 2017) - Iraq
+        [date(2014, 9, 13), date(2015, 3, 10)],  # Battle of Kobani (Sep 2014 - Mar 2015) - Syria
+        [date(2017, 6, 4), date(2017, 10, 30)],  # Battle of Raqqa (Jun-Oct 2017) - Syria
+        [date(2015, 9, 25), date(2015, 11, 1)],  # Kunduz City Attack (Sep-Oct 2015) - Afghanistan
+        [date(2016, 5, 9), date(2016, 12, 30)],  # Battle of Sirte (May-Dec 2016) - Libya
 
         # Geopolitical Conflicts / Armed Conflicts (Asia)
-        [date(2019, 2, 1), date(2019, 2, 28)],  # "Pulwama attack and Balakot Airstrikes, kashmir conflict (February 2019) - India / Pakistan"
-        [date(2016, 11, 1), date(2019, 12, 31)], # "Syrian Civil War, Aleppo Offensive (2016))",
-        [date(2018, 6, 1), date(2018, 12, 31)],  # Yemeni Civil War, Battle of Hudaydah (June - December 2018)
+        [date(2019, 2, 14), date(2019, 5, 10)],  # Pulwama attack and Balakot Airstrikes (Feb 2019) - India/Pakistan
+        [date(2016, 6, 1), date(2016, 12, 31)],  # Syrian Civil War, Aleppo Offensive (Nov 2016 - Dec 2019)
+        [date(2018, 6, 10), date(2018, 12, 25)],  # Yemeni Civil War, Battle of Hudaydah (Jun-Dec 2018)
 
         # Geopolitical Conflicts / Armed Conflicts (Europe)
-        [date(2014, 2, 1), date(2014, 12, 31)],  # Crimea Annexation and Conflict in Eastern Ukraine (2014)
-        [date(2016, 4, 1), date(2016, 4, 30)],  # Nagorno-Karabakh Conflicts (Clashes (2016)) - Armenia-Azerbaijan
+        [date(2014, 2, 10), date(2014, 12, 31)],  # Crimea Annexation and Conflict in Eastern Ukraine (Feb-Dec 2014)
+        [date(2016, 3, 28), date(2016, 4, 8)],  # Nagorno-Karabakh Conflicts (Clashes Apr 2016) - Armenia-Azerbaijan
 ]
 
     if not all_plots:
@@ -796,7 +436,7 @@ def plot_update_freq_v5(index, filtered_df_metadata, all_plots=False, grouping_m
         plt.xlim(datetime(2013, 1, 1), datetime(2019, 12, 1))
         # plt.ylim(0,10)
         plt.show()
-        return event_metadata       ####
+        return event_metadata
     else:
 
         # if event_type == "environment":
@@ -875,13 +515,13 @@ def plot_update_freq_v5(index, filtered_df_metadata, all_plots=False, grouping_m
                 event_type = "environmental"
             elif 13 <= idx <= 17:  # US Conflicts
                 region = "US"
-                event_type = "geopolitical conflict"
+                event_type = "geopolitical"
             elif 18 <= idx <= 20:  # Asia Conflicts
                 region = "Asia"
-                event_type = "geopolitical conflict"
+                event_type = "geopolitical"
             elif 21 <= idx <= 22:  # Europe Conflicts
                 region = "Europe"
-                event_type = "geopolitical conflict"
+                event_type = "geopolitical"
             else:
                 region = "Unknown"
                 event_type = "Unknown"
@@ -915,7 +555,7 @@ def plot_update_freq_v5(index, filtered_df_metadata, all_plots=False, grouping_m
             ax[idx].bar(date_counts["upload_date"], date_counts["count"], width=3)
             ax[idx].set_xlabel("Date")
             ax[idx].set_ylabel("Count")
-            ax[idx].set_title(f"Upload frequency for videos related to {title}")
+            ax[idx].set_title(f"Upload frequency for videos related to {title}, videos found: {event_metadata.shape[0]:,}")
 
             ax[idx].xaxis.set_major_locator(mdates.YearLocator())
             ax[idx].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
