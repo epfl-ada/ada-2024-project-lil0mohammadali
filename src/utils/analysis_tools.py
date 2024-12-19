@@ -4,9 +4,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import stats
 import seaborn as sns
-from nltk.corpus import stopwords #needs 'pip install nltk'
-import nltk
-nltk.download('stopwords')
+# from nltk.corpus import stopwords #needs 'pip install nltk'
+# import nltk
+# nltk.download('stopwords')
 from src.utils.keywords import add_video_live
 
 def plot_video_stat(video_list, stat):
