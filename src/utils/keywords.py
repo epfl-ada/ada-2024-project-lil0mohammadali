@@ -809,7 +809,7 @@ def plot_update_freq_v5(index, filtered_df_metadata, all_plots=False, grouping_m
         #     raise KeyError("wrong event type: \"environment\" or \"conflict\" ")
         
         list_of_lists = list_of_lists_environment + list_of_lists_conflict
-        titles = titles_environment + titles_environment
+        titles = titles_environment + titles_conflict
         
         fig, ax = plt.subplots(len(list_of_lists), 1, figsize=(16, 36), constrained_layout=True)
 
