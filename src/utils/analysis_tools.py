@@ -164,9 +164,9 @@ def capitalisation_ratio(text):
     up_count = sum(1 for c in text if c.isupper())
     low_count = sum(1 for c in text if c.islower())
     #handle edge cases
-    if low_count == 0:
-        return float('inf') if up_count > 0 else 0  
-    return up_count / low_count
+    if (low_count + up_count) == 0:
+        return np.nan if up_count > 0 else 0  
+    return up_count / (low_count+up_count)
 
 
 def cap_ratio(video_list, text):
@@ -766,8 +766,57 @@ def plot_correlation_matrix_features_and_metrics(corr, list_vid_features, list_r
 
     plt.title(plot_title)
     plt.show()
+
+def compute_channel_activity(metadata: pl.DataFrame, channel_id: str, date:str, timespan:int):
+    """Compute the channel activity for a given date and timespan
     
-def create_video_features_dataframe (event_metadata, timeseries_df):
+    Parameters:
+    metadata: pl.DataFrame
+        The metadata for the channels containing at least the columns 'channel_id', 'upload_date'
+    channel_id: str
+        The channel id for which to compute the activity
+    date: str 
+        The date for which to compute the activity in the format 'YYYY-MM-DD'
+    timespan: int
+        The timespan in days for which to compute the activity in +/- days around the date
+    """
+
+    assert 'channel_id' in metadata.columns, "The metadata should contain the column 'channel_id'"
+    assert 'upload_date' in metadata.columns, "The metadata should contain the column 'upload_date'"
+
+    channel_metadata = metadata.filter(pl.col('channel_id') == channel_id)
+    date_list = pd.date_range(start = pd.to_datetime(date) - pd.DateOffset(days=timespan),
+                                end = pd.to_datetime(date) + pd.DateOffset(days=timespan)).strftime('%Y-%m-%d').tolist()
+    nb_videos = len(channel_metadata.filter(pl.col('upload_date').is_in(date_list)))
+    return nb_videos/len(date_list)
+
+def get_channels_activity(event_metadata: pl.DataFrame, feather_metadata: pl.DataFrame) -> pl.DataFrame:
+    """Compute the activity for each channel in the videos related to the events
+
+    Parameters:
+    event_metadata: pl.DataFrame
+        The metadata for the videos related to the events
+    feather_metadata: pl.DataFrame
+        The metadata for the channels containing at least the columns 'channel_id', 'upload_date'
+    """
+    
+    assert 'channel_id' in feather_metadata.columns, "The metadata should contain the column 'channel_id'"
+    assert 'upload_date' in feather_metadata.columns, "The metadata should contain the column 'upload_date'"
+
+    activities = []
+    index = 1
+    num_rows = event_metadata.height
+    for vid in event_metadata.iter_rows(named=True):
+        print(f"Processing video {index}/{num_rows}\r", end="")
+        index += 1
+        activities.append(compute_channel_activity(feather_metadata, vid["channel_id"], 
+                                                   vid['upload_date'], 14))
+    return pl.DataFrame({
+        'display_id': event_metadata['display_id'],
+        'channel_activity': activities
+    })
+
+def create_video_features_dataframe (event_metadata, feather_metadata):
     """
     This function creates a dataframe containing features for each video in the event_metadata dataframe.
     The features are computed from the timeseries dataframe, and include the mean, standard deviation and median of the number of videos uploaded per day for the channel of each video.
@@ -776,8 +825,8 @@ def create_video_features_dataframe (event_metadata, timeseries_df):
     Parameters:
     event_metadata: polars.DataFrame
         The dataframe containing the metadata of the videos in the event
-    timeseries_df: polars.DataFrame
-        The dataframe containing the timeseries data of the channels
+    feather_metadata: polars.DataFrame
+        The dataframe containing the metadata of ALL the videos from the channels
         
     Returns:
     vid_features: polars.DataFrame
@@ -785,27 +834,18 @@ def create_video_features_dataframe (event_metadata, timeseries_df):
     """
     
     #select the relevant columns to create the vid_features dataframe
-    vid_features = event_metadata[['display_id','channel_id','duration', 'is_live']]
-    
-    #compute interesting statistics on the timeseries dataframe and join them together
-    counts, means, stds, meds  = get_general_ch_statistics(timeseries_df,['delta_videos'])
-    joined = counts.join(means, on='channel_id').rename({'delta_videos':'mean_delta_videos'})
-    joined = joined.join(stds, on='channel_id').rename({'delta_videos':'std_delta_videos' })
-    joined = joined.drop('counts')
+    vid_features = event_metadata[['display_id','channel_id', 'event_type', 'region', 'event',  'duration', 'is_live']]
 
-    #merge the timeseries statistics with the video features daframe
-    vid_features = vid_features.join(joined, on='channel_id', how='inner')
+    activity = get_channels_activity(event_metadata, feather_metadata)
+    vid_features = vid_features.join(activity, on='display_id', how='inner')
+
     vid_features = vid_features.drop('channel_id')
     
-    #compute the capitalization ratio of the title for each video (number of capital letters/number of lowercase letters) and add it to the dataframe
+    #compute the capitalization ratio of the title for each video
     titles = event_metadata[['display_id','title']]
     ratio = cap_ratio(titles, 'title')
     ratio = ratio.drop('title')
     vid_features = vid_features.join(ratio, on='display_id', how='inner')
-
-    #remove rows with capitalization ratio of infinity, and replace NaN values with 1 in order to avoid division by zero
-    vid_features = vid_features.with_columns(pl.col('capitalisation_ratio').replace(np.NaN, 1))
-    vid_features = vid_features.filter(pl.col('capitalisation_ratio') != np.inf)
     
     return vid_features
 
