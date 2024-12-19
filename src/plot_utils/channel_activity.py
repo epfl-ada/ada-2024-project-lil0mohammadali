@@ -105,9 +105,9 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
         fig.write_html(save_path)
 
 
-def plot_video_metrics(metadata: pl.DataFrame, timeseries_df: pl.DataFrame, save_path: str = None, show: bool = True):
+def plot_video_metrics_event_type(metadata: pl.DataFrame, timeseries_df: pl.DataFrame, save_path: str = None, show: bool = True):
     """
-    Plot the video metrics based on event types and origin
+    Plot the video metrics based on event types, and plots the distribution based on origins
 
       Args:
         df_channels (pl.DataFrame): df_channels_en unfiltered
@@ -262,6 +262,171 @@ def plot_video_metrics(metadata: pl.DataFrame, timeseries_df: pl.DataFrame, save
                     row=row,
                     col=col,
                 ) 
+    
+        buttons.append(dict(
+            args=[{'visible': [False]*i*num_subplots + [True]*num_subplots + [False]*(len(list_of_events)-i-1)*num_subplots}],
+            label=list_of_events[i],
+            method="update"
+        ))
+
+    initial_visibility = [True]*num_subplots + [False]*(len(events)-1)*num_subplots
+    for i in range(len(fig.data)):
+        fig.data[i].visible = initial_visibility[i]    
+
+    fig.update_layout(
+        title=f"Box Plot of Video Metrics for {event_type[0]} Events",
+        title_x = 0.5,
+        title_xanchor='center',
+        updatemenus=[
+            dict(
+                buttons=list(buttons),
+                direction="down",
+                pad={"r": 10, "t": 10},
+                showactive=True,
+                x=0,
+                xanchor="right",
+                y=1.2,
+                yanchor="top"
+            )
+        ],
+
+        # placing legend for pie plot
+        legend=dict(
+            x=0.8,  # origin is bottom left
+            y=0.3,   
+            xanchor='left',  # anchor the legend's x-position to the left side
+            yanchor='middle',  # anchor the legend's y-position to the middle
+            orientation='v'  # legend items stacked vertically
+        ),
+        hovermode='x'
+    )
+
+    if show:
+        fig.show(scrollZoom=False)
+    if save_path:
+        fig.write_html(save_path)
+
+def plot_video_metrics_response(metadata: pl.DataFrame, save_path: str = None, show: bool = True):
+    """
+    Plot the video metrics based on event types, and plots the response metrics based on origins
+
+      Args:
+        df_channels (pl.DataFrame): df_channels_en unfiltered
+        df_timeseries (pl.DataFrame): df_timeseries unfiltered
+        save_path (str): path to save the plot as an HTML file
+        show (bool): whether to display the plot
+    """
+
+    event_type = ['geopolitical', 'environmental']
+    geographical_location = ['us', 'eu', 'asia']
+    list_of_events = ['Event 0', 'Event 1', 'Event 2', 'Event 3', 'Event 4', 'Event 5', 'Event 6', 'Event 7', 'Event 8', 'Event 9', 'Event 10', 'Event 11']
+    events = [1,2]
+    # plot settings
+    vid_feature_columns = ['views', 'like_dislike', 'number_of_comments', 'replies_to_comments']
+    subplot_titles_ = ['Views', 'Like/Dislike Ratio', 'Number of Comments', 'Number of Replies to to Comments']
+    num_subplots = 4*3
+    row_num = 2
+    col_num = 2
+
+    buttons = []
+    # separated by event type
+    fig = make_subplots(rows=row_num, cols=col_num, 
+                        subplot_titles=subplot_titles_, 
+                        horizontal_spacing = 0.1, vertical_spacing=0.15,
+                        specs=[[{'type': 'box'}, {'type': 'box'}],  # First row for box plots
+                                [{'type': 'box'}, {'type': 'box'}]],
+                        column_widths=[0.5, 0.5],  # Equal column widths
+                        row_heights=[0.5, 0.5] ) # Equal row heights ) # All subplots are 'xy' type by default)
+
+    annotations = []
+    for i, title in enumerate(subplot_titles_):
+        row = (i // col_num) + 1
+        col = (i % col_num) + 1
+        annotations.append(dict(
+            # x= col / col_num - 1 / (2 * col_num),
+            y = 1 - (row - 1) / row_num + 0.02 if row == 1 else 1 - (row - 1) / row_num - 0.08,
+            text=title,
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            xanchor="center",
+            yanchor="bottom",
+            font=dict(size=16)
+        ))
+
+
+    # Customize layout
+    fig.update_layout(
+        yaxis_title="Values",
+        # boxmode='group',  # Grouped box plots
+        height=600,
+        width=800,
+        showlegend=True,
+        annotations = annotations,
+        xaxis=dict(showticklabels=True),  # For the first subplot
+        xaxis2=dict(showticklabels=True),  # For the second subplot
+        xaxis3=dict(showticklabels=True),  # For the third subplot
+        xaxis4=dict(showticklabels=True)  # For the fourth subplot
+       # xaxis5=dict(showticklabels=True),  # For the fifth subplot
+        # yaxis1=dict(
+        #     tickvals=[1e-1, 1, 10, 100, 1000, 10000, 100000],  # Start closer to 1
+        #     ticktext=["0", "1", "10", "100", "1k", "10k", "100k"],  # Label 1e-2 as "0"
+        #     type='log',  # Logarithmic scale
+        #     autorange=False,
+        #     range=[-1, 5]  # Adjust the range accordingly
+        # ),
+        # # ),
+        # yaxis4=dict(
+        #     tickvals=[1e-2, 1e-1, 1, 10, 100],  # Start closer to 1
+        #     ticktext=["0", "0.1", "1", "10", '100'],  # Label 1e-2 as "0"
+        #     type='log',  # Logarithmic scale
+        #     autorange=False,
+        #     range=[-2, 2]  # Adjust the range accordingly
+        # )
+    )
+
+    for i, event in enumerate(event_type):
+        event_metadata =  metadata.filter(pl.col('event_type') == event)
+        # # create the video features dataframe for the event from the metadata and timeseries dataframes
+
+        # ## MAY REMOVE THIS BECUSE TIME SERIES DATA MAY NOT BE PLOTTED
+        # vid_features = create_video_features_dataframe(event_metadata, timeseries_df)
+
+        # ############### FOR TESTING, REMOVE WITH REAL DATAFRAME #################
+        # regions = np.random.choice(['us', 'eu', 'asia'], size=vid_features.height)
+        # vid_features = vid_features.with_columns(pl.Series('region', regions))
+        # #########################################################################
+
+        fig.update_layout(
+            title=f"Box Plot of Video Metrics for {event_type[i]} Events",
+        )
+
+        visible = (i == 0)
+        # Loop through columns and add a box plot for each
+        for idx, column in enumerate(vid_feature_columns):
+            row = (idx // col_num) + 1  # Calculate row number
+            col = (idx % col_num) + 1   # Calculate column number
+            # Add trace to the subplot
+            # plotting box plots comparing geographical location
+            for region in geographical_location:
+                # print(vid_features)
+                # print(region)
+                region_features = event_metadata.filter(pl.col('region') == region)[column].to_list()
+                # print(region_features)
+                fig.add_trace(
+                    go.Box(
+                        y=region_features,
+                        name=f"{region}",
+                        # jitter=0.3,
+                        # pointpos=-2.0,
+                        # width=0.001,
+                        showlegend=False,
+                        boxpoints=False # suspectedoutliers, all, outliers
+                        # boxmean='sd'  # Show mean and standard deviation
+                    ),
+                row=row,
+                col=col,
+            ) 
     
         buttons.append(dict(
             args=[{'visible': [False]*i*num_subplots + [True]*num_subplots + [False]*(len(list_of_events)-i-1)*num_subplots}],
