@@ -925,6 +925,9 @@ def plot_video_metrics_response_region(metadata: pl.DataFrame, save_path: str = 
     if save_path:
         fig.write_html(save_path)
 
+def plot_timeseries(metadata, ):
+    
+
 if __name__ == "__main__":
     path_df_channels_en = 'data/df_channels_en.tsv'
 
