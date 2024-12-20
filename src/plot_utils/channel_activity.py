@@ -2,8 +2,6 @@ import polars as pl
 from ..scripts import filters
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from ..utils.keywords import get_event_metadata
-from ..utils.analysis_tools import create_video_features_dataframe
 import numpy as np
 import matplotlib.pyplot as plt
 
