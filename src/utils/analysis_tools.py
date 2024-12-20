@@ -566,16 +566,16 @@ def compute_correlation_matrix (df, how = 'pearson', plot = False, plot_title = 
     
     return corr, pvals
     
-def compute_correlation_matrix_features_and_metrics (vid_features, response_metrics, how='pearson'):
+def compute_correlation_matrix_features_and_metrics (features_and_metrics, how='pearson'):
     """
     Compute the correlation matrix for the features and metrics dataframes, and plot it as a heatmap.
     
     --------------------------------------------------------
     Parameters:
-    vid_features (pd.DataFrame):
-        The dataframe containing the video features.
-    metrics (pd.DataFrame): 
-        The dataframe containing the response metrics.
+    features_and_metrics (pd.DataFrame):
+        The dataframe containing the features and metrics for which we want to compute the correlation matrix.
+        It should be already filtered for the columns we want to analyze.
+        Make sure to remove all non-numeric columns before using this function.
     how (str):
         The correlation coefficient to compute. Can be 'pearson' or 'spearman'. (default is 'pearson')
         The pearson coefficient is used to measure the linear correlation between two variables.
@@ -589,14 +589,8 @@ def compute_correlation_matrix_features_and_metrics (vid_features, response_metr
         The p-values for the correlation matrix
     """
     
-    features_and_metrics = vid_features.join(response_metrics, on='display_id', how='inner')
-    
-    filtered_df = features_and_metrics.select(pl.col(pl.Float64, pl.Int64))
-    
-    if any('is_live' in s for s in filtered_df.columns):
-        filtered_df = filtered_df.drop('is_live')
-    
-    df_standardized = stats.zscore(pd.DataFrame(filtered_df), axis=0)
+    #standardize the features and metrics dataframe  
+    df_standardized = stats.zscore(pd.DataFrame(features_and_metrics), axis=0).fillna(0)
     
     if how == 'pearson':
         corr = np.ones((df_standardized.shape[1], df_standardized.shape[1]))
@@ -604,9 +598,13 @@ def compute_correlation_matrix_features_and_metrics (vid_features, response_metr
         for i in range(df_standardized.shape[1]):
             for j in range(df_standardized.shape[1]):
                 corr[i,j], pvals[i,j] = stats.pearsonr(df_standardized[i], df_standardized[j])
+        corr[np.isnan(corr)] = 0
+        pvals[np.isnan(pvals)] = 1
     
     if how == 'spearman':
         corr, pvals = stats.spearmanr(df_standardized.to_numpy())
+        corr[np.isnan(corr)] = 0
+        pvals[np.isnan(pvals)] = 0
     
     return corr, pvals
     
@@ -885,28 +883,116 @@ def create_response_metrics_df (event_metadata, num_comments):
     
     return response_metrics
 
+def compute_correlation_for_group (features_and_metrics, how_to_group, features, metrics):
+    """
+    Compute the correlation matrix for the features and metrics dataframe for a given grouping type.
+    
+    --------------------------------------------------------
+    Parameters:
+    features_and_metrics (pd.DataFrame):
+        The dataframe containing the video features and response metrics.
+    how_to_group (str):
+        The column name to group the data by. Can be 'event', 'event_type' or 'region'.
+    features (list):
+        A list of the features to include in the correlation matrix.
+    metrics (list):
+        A list of the response metrics to include in the correlation matrix.
+    
+    --------------------------------------------------------    
+    Returns:
+    correlations (list)
+        A list of correlation matrices for the given dataset, one for each group.
+    pvalues (list)
+        A list of p-values for the correlation matrices.
+    list_of_event_groupings (list)
+        A list of the event groupings used for the correlation matrices.
+    """
+    
+    #extract the list of events, event types and regions from the features and metrics dataframe
+    list_of_events = list(features_and_metrics['event'].unique())
+    list_of_event_types = list(features_and_metrics['event_type'].unique())
+    list_of_regions = list(features_and_metrics['region'].unique())
+    
+    #part of creating a list of vid_features and resonse_metrics for all events
+    correlations = []
+    pvalues = []
+      
+    if how_to_group == 'event':
+        list_of_event_groupings = list_of_events
+        for event in list_of_events:
+            event_features_and_metrics = features_and_metrics.filter(pl.col(how_to_group) == event)[features + metrics]
+            
+            # compute the correlation matrix and p-values for the videos and response metrics
+            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics)
+            correlations.append(corr)
+            pvalues.append(pvals)
+            
+    elif how_to_group == 'event_type':
+        list_of_event_groupings = list_of_event_types
+        for event_type in list_of_event_types:
+            event_features_and_metrics = features_and_metrics.filter(pl.col(how_to_group) == event_type)[features + metrics]
+            
+            # compute the correlation matrix and p-values for the videos and response metrics
+            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics)
+            correlations.append(corr)
+            pvalues.append(pvals)
+            
+    elif how_to_group == 'region':
+        list_of_event_groupings = list_of_regions
+        for region in list_of_regions:
+            event_features_and_metrics = features_and_metrics.filter(pl.col(how_to_group) == region)[features + metrics]
+            
+            # compute the correlation matrix and p-values for the videos and response metrics
+            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics)
+            correlations.append(corr)
+            pvalues.append(pvals)
+    
+    return correlations, pvalues, list_of_event_groupings
 
-def plot_correlation_for_groups_of_events(list_of_correlations, list_of_pvalues, x_labels, y_labels, list_of_events): 
+
+def plot_correlation_for_groups_of_events(list_of_correlations, list_of_pvalues, feature_labels, metric_labels, list_of_events, title):
+    """
+    Plot the correlation coefficients and p-values for the correlation matrix between features and metrics for different groupings of events.
+    
+    --------------------------------------------------------
+    Parameters:
+    list_of_correlations (list of np.arrays):
+        The list of correlation matrices for the different groupings of events.
+    list_of_pvalues (list of np.arrays):
+        The list of p-values for the correlation matrices for the different groupings of events.
+    feature_labels (list of strings):
+        The list of feature labels.
+    metric_labels (list of strings):
+        The list of metric labels.
+    list_of_events (list of strings):
+        The list of event groupings.
+    title (str):
+        The title of the plot.
+    
+    --------------------------------------------------------
+    Returns: fig
+        The plot of the correlation coefficients and p-values for the correlation matrix between features and metrics for different groupings of events.
+    """
 
     fig = make_subplots(rows=1, cols=2, subplot_titles=["Correlation Coefficients", "p-values"], horizontal_spacing = 0.2)
 
-    fig.update_layout(autosize=False,title="Correlation Matrix of Video Features and Response Metrics", title_x=0.5, title_y=0.9, height=600, width=1400)
+    fig.update_layout(autosize=False,title=title, title_x=0.5, title_y=0.95, height=500, width=1400)
 
 
     buttons = []
 
     for i in range(len(list_of_events)):
-        corr = list_of_correlations[i][len(x_labels):,:len(x_labels)]
-        pvals = list_of_pvalues[i][len(x_labels):,:len(x_labels)]
+        corr = list_of_correlations[i][len(feature_labels):,:len(feature_labels)]
+        pvals = list_of_pvalues[i][len(feature_labels):,:len(feature_labels)]
         pvals_significant = (pvals < 0.05)
 
-        fig.add_trace(go.Heatmap(z=corr, x=x_labels, y=y_labels, 
+        fig.add_trace(go.Heatmap(z=corr, x=feature_labels, y=metric_labels, 
                                 colorscale='RdYlBu', zmid = 0, zmin=-1, zmax=1,
-                                colorbar={"title":"Correlation <br> coefficient", 'x':0.43}, 
+                                colorbar={"title":"Correlation <br> coefficient", 'x':0.4}, 
                                 hovertemplate = " Response metric : %{y}<br> Feature : %{x}<br> Corelation coefficient: %{z:.2f}<extra></extra>"),
                                 row=1, col=1)
         
-        fig.add_trace(go.Heatmap(z=pvals, x=x_labels, y=y_labels, 
+        fig.add_trace(go.Heatmap(z=pvals, x=feature_labels, y=metric_labels, 
                                 colorscale= [
                                 [0, 'rgb(250, 50, 50)'],        #0
                                 [0, 'rgb(250, 170, 90)'],        #0
@@ -927,20 +1013,25 @@ def plot_correlation_for_groups_of_events(list_of_correlations, list_of_pvalues,
     for i in range(len(fig.data)):
         fig.data[i].visible = initial_visibility[i]   
 
+    if len(list_of_events) > 5 :
+        x_button = 0.75
+    else:
+        x_button = 0.5
 
     fig.update_layout(
         updatemenus=[
             dict(
                 buttons=list(buttons),
-                direction="down",
-                pad={"r": 10, "t": 10},
+                type = 'dropdown',
+                direction="up",
                 showactive=True,
-                x=0,
+                x=x_button,
                 xanchor="right",
-                y=1.15,
+                y=-0.3,
                 yanchor="top"
             )
         ],
     )
 
     fig.show(scrollZoom=False)
+    return fig
