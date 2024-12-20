@@ -332,8 +332,6 @@ def plot_update_freq(filtered_df_metadata, grouping_mode="daily", event_type=Non
         terms = list_of_lists[idx]
         title = titles[idx]
 
-        print(f"Event: {title}")
-
         final_condition = build_filter_condition(terms)
         event_metadata = filtered_df_metadata.filter(final_condition)
 
@@ -342,9 +340,6 @@ def plot_update_freq(filtered_df_metadata, grouping_mode="daily", event_type=Non
                 (pl.col("upload_date") > event_dates[idx][0]) & 
                 (pl.col("upload_date") < event_dates[idx][1])
             )
-
-        print(f"Related videos found: {event_metadata.shape[0]:,}")
-        print("------------")
 
         # Determine event metadata based on idx
         if idx <= 3:  # US Environment Events
