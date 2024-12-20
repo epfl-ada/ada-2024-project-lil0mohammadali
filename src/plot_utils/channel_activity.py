@@ -153,17 +153,11 @@ def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str =
     event_type = ['geopolitical', 'environmental']
     geographical_location = ['US', 'Europe', 'Asia']
     # plot settings
-    vid_feature_columns = ['duration', 'channel_activity', 'subjectivity', 'capitalisation_ratio', 'is_footage']
-    subplot_titles_ = ['Duration (sec)', 'Channel Activity', 'Subjectivity', 'Capitalization Ratio', 
-                        'Footage %: US', 'Footage %: Europe ', 'Footage %: Asia', 
-                        'Update %: US', 'Update %: Europe ', 'Update %: Asia', ' ',
-                        'Breaking %: US', 'Breaking %: Europe ', 'Breaking %: Asia']
-    
-    # subplot_titles_ = ['Duration (sec)', 'Channel Activity', 'Subjectivity', 
-    #              'Capitalization Ratio', ' ', 
-    #              'Is Footage %:<br>Geopolitical', 'Is Footage %:<br>Environmental']
-    num_subplots = 4*3+3*3
-    row_num = 4
+    vid_feature_columns = ['duration', 'channel_activity', 'subjectivity', 'capitalisation_ratio']
+    subplot_titles_ = ['Duration (sec)', 'Channel Activity', 'Subjectivity', 'Capitalization Ratio']
+   
+    num_subplots = 4*3
+    row_num = 1
     col_num = 4 
 
     buttons = []
@@ -171,20 +165,18 @@ def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str =
     fig = make_subplots(rows=row_num, cols=col_num, 
                         subplot_titles=subplot_titles_, 
                         horizontal_spacing = 0.08, vertical_spacing=0.1,
-                        specs=[[{'type': 'box'}, {'type': 'box'}, {'type': 'box'}, {'type': 'box'}],  # First row for box plots
-                                [{'type': 'pie'}, {'type': 'pie'}, {'type': 'pie'}, None],
-                                [{'type': 'pie'}, {'type': 'pie'}, {'type': 'pie'}, None],
-                                [{'type': 'pie'}, {'type': 'pie'}, {'type': 'pie'}, None]],
+                        # specs=[[{'type': 'box'}, {'type': 'box'}, {'type': 'box'}, {'type': 'box'}],  # First row for box plots
+                        #         ],
                         column_widths=[0.25, 0.25, 0.25, 0.25,],  # Equal column widths
-                        row_heights=[0.4, 0.2, 0.2, 0.2] ) # Equal row heights ) # All subplots are 'xy' type by default)
+                        ) # Equal row heights ) # All subplots are 'xy' type by default)
 
     annotations = []
     for i, title in enumerate(subplot_titles_):
-        row = (i // col_num) + 1
+        row = 1
         col = (i % col_num) + 1
         y_position = 1 - (row - 1) / row_num + 0.02 if row == 1 else 1 - (row - 1) / row_num - 0.02
 
-        print(row, col)
+        # print(row, col)
         annotations.append(dict(
             x= col / col_num - 1 / (2 * col_num),
             y = y_position,
@@ -202,8 +194,8 @@ def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str =
     fig.update_layout(
         yaxis_title="Values",
         # boxmode='group',  # Grouped box plots
-        height=1200,
-        width=1000,
+        height=600,
+        width=800,
         showlegend=True,
         annotations = annotations,
         yaxis1=dict(
@@ -228,80 +220,27 @@ def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str =
 
         # Loop through columns and add a box plot for each
         for idx, column in enumerate(vid_feature_columns):
-            row = (idx // col_num) + 1  # Calculate row number
+            row = 1  # Calculate row number
             col = (idx % col_num) + 1   # Calculate column number
-            # Add trace to the subplot
-            # plotting the circles
-            if row == 2 and col == 1:
-                # live_values_df=vid_features.filter(pl.col('region') == 'US')['is_footage'].value_counts()
-                # live_values_df = live_values_df.to_pandas()
-                # live_values_df['is_footage'] = live_values_df['is_footage'].map({False: 'Not Footage', True: 'Footage'})
-                # fig.add_trace(
-                #     go.Pie(labels=live_values_df['is_footage'], 
-                #         values=live_values_df['count'], 
-                #         showlegend=True),
-                #     row=row,
-                #     col=col,
-                # )
-                # # print("circle plot for eu")
-                # live_values_df=vid_features.filter(pl.col('region') == 'Europe')['is_footage'].value_counts()
-                # live_values_df = live_values_df.to_pandas()
-                # live_values_df['is_footage'] = live_values_df['is_footage'].map({False: 'Not Footage', True: 'Footage'})
-                # fig.add_trace(
-                #     go.Pie(labels=live_values_df['is_footage'], 
-                #         values=live_values_df['count'], 
-                #         showlegend=True),
-                #     row=row,
-                #     col=col+1,
-                # )
-                # # print("circle plot for asia")
-                # live_values_df=vid_features.filter(pl.col('region') == 'Asia')['is_footage'].value_counts()
-                # live_values_df = live_values_df.to_pandas()
-                # live_values_df['is_footage'] = live_values_df['is_footage'].map({False: 'Not Footage', True: 'Footage'})
-                # fig.add_trace(
-                #     go.Pie(labels=live_values_df['is_footage'], 
-                #         values=live_values_df['count'], 
-                #         showlegend=True),
-                #     row=row,
-                #     col=col+2,
-                # )
-                fig = add_pie_chart_for_metric(fig, vid_features, 'is_footage', 'Footage', geographical_location, 'region', 2, 1)
-                fig = add_pie_chart_for_metric(fig, vid_features, '_update_', 'Update', geographical_location, 'region', 3, 1)
-                fig = add_pie_chart_for_metric(fig, vid_features, '_breaking_', 'Breaking', geographical_location, 'region', 4, 1)
-            elif row == 3 and col == 1:
-                metric_name = 'Update'
-                for i,metric in enumerate(geographical_location):
-                    live_values_df=video_metadata.filter(pl.col('region') == metric)['_update_'].value_counts()
-                    live_values_df = live_values_df.to_pandas()
-                    live_values_df['_update_'] = live_values_df['_update_'].map({False: f'Not {metric_name}', True: f'{metric_name}'})
-                    
-                    fig.add_trace(
-                        go.Pie(labels=live_values_df['_update_'], 
-                            values=live_values_df['count'], 
-                            showlegend=True),
-                        row=row,
-                        col=column+i,
-                    )
-            else:
-                # plotting box plots comparing geographical location
-                for region in geographical_location:
-                    # print(vid_features)
-                    # print(region)
-                    region_features = vid_features.filter(pl.col('region') == region)[column].to_list()
-                    # print(region_features)
-                    fig.add_trace(
-                        go.Box(
-                            y=region_features,
-                            name=f"{region}",
-                            jitter=0.3,
-                            pointpos=-2.0,
-                            # width=0.001,
-                            showlegend=False,
-                            boxpoints='all' # suspectedoutliers, all, outliers
-                            # boxmean='sd'  # Show mean and standard deviation
-                        ),
-                    row=row,
-                    col=col,
+
+            for region in geographical_location:
+                # print(vid_features)
+                # print(region)
+                region_features = vid_features.filter(pl.col('region') == region)[column].to_list()
+                # print(region_features)
+                fig.add_trace(
+                    go.Box(
+                        y=region_features,
+                        name=f"{region}",
+                        jitter=0.3,
+                        pointpos=-2.0,
+                        # width=0.001,
+                        showlegend=False,
+                        boxpoints='all' # suspectedoutliers, all, outliers
+                        # boxmean='sd'  # Show mean and standard deviation
+                    ),
+                row=row,
+                col=col,
                 )
         label_name = event_type[i].capitalize()
         buttons.append(dict(
@@ -338,7 +277,6 @@ def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str =
                 yanchor="top"
             )
         ],
-
         # placing legend for pie plot
         legend=dict(
             x=0.8,  # origin is bottom left
@@ -371,23 +309,20 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
     event_type = ['geopolitical', 'environmental']
     geographical_location = ['US', 'Europe', 'Asia']
     # plot settings
-    vid_feature_columns = ['duration', 'channel_activity', 'subjectivity', 'capitalisation_ratio', 'is_footage']
-    num_subplots = 4*3+3
-    row_num = 2
+    vid_feature_columns = ['duration', 'channel_activity', 'subjectivity', 'capitalisation_ratio']
+    num_subplots = 4*2
+    row_num = 1
     col_num = 4 
-    subplot_titles_ = ['Duration (sec)', 'Channel Activity', 'Subjectivity', 
-                 'Capitalization Ratio', ' ', 
-                 'Is Footage %:<br>Geopolitical', 'Is Footage %:<br>Environmental']
+    subplot_titles_ = ['Duration (sec)', 'Channel Activity', 'Subjectivity', 'Capitalization Ratio',]
 
     buttons = []
     # separated by event type
     fig = make_subplots(rows=row_num, cols=col_num, 
                         subplot_titles=subplot_titles_, 
                         horizontal_spacing = 0.1, vertical_spacing=0.18,
-                        specs=[[{'type': 'box'}, {'type': 'box'}, {'type': 'box'}, {'type': 'box'}],  
-                                [{'type': 'pie'}, {'type': 'pie'}, {'type': 'pie'}, None]],
+                        specs=[[{'type': 'box'}, {'type': 'box'}, {'type': 'box'}, {'type': 'box'}]],
                         column_widths=[0.25, 0.25, 0.25, 0.25,],  
-                        row_heights=[0.5, 0.5] ) 
+    ) 
 
     annotations = []
     for i, title in enumerate(subplot_titles_):
@@ -410,7 +345,7 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
     fig.update_layout(
         yaxis_title="Values",
         # boxmode='group',  # Grouped box plots
-        height=800,
+        height=600,
         width=800,
         showlegend=True,
         annotations = annotations,
@@ -430,9 +365,7 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
             range=[-2, 2]  # Adjust the range accordingly
         )
     )
-    # print(video_metadata.columns)
-    # ################### INSERTION OF PLOT BASED ON REGION #################
-    num_subplots_region_category = 4*2+2
+
     for j, region in enumerate(geographical_location):
 
         vid_features = video_metadata.filter(pl.col('region') == region)
@@ -475,11 +408,11 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
                         go.Box(
                             y=event_features,
                             name=f"{event}",
-                            # jitter=0.3,
-                            # pointpos=-2.0,
+                            jitter=0.3,
+                            pointpos=-2.0,
                             # width=0.001,
                             showlegend=False,
-                            boxpoints=False # suspectedoutliers, all, outliers
+                            boxpoints='all' # suspectedoutliers, all, outliers
                             # boxmean='sd'  # Show mean and standard deviation
                         ),
                     row=row,
@@ -488,7 +421,7 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
         buttons.append(dict(
         args=[
             {
-                'visible': [False]*j*num_subplots_region_category + [True]*num_subplots_region_category + [False]*(len(geographical_location)-j-1)*num_subplots_region_category,
+                'visible': [False]*j*num_subplots + [True]*num_subplots + [False]*(len(geographical_location)-j-1)*num_subplots,
             },
             {
                 'title.text': f"Plot of Video Metrics for {region} Events"
@@ -498,12 +431,12 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
         method="update"
         ))
     # Initial visibility for country
-    initial_visibility = [True]*num_subplots_region_category + [False]*(len(geographical_location)-1)*num_subplots_region_category #+ [False] * len(geographical_location)*num_subplots_region_category
-    print("iv: ", len(initial_visibility))
+    initial_visibility = [True]*num_subplots + [False]*(len(geographical_location)-1)*num_subplots #+ [False] * len(geographical_location)*num_subplots_region_category
+    # print("iv: ", len(initial_visibility))
     for i in range(len(fig.data)):
         fig.data[i].visible = initial_visibility[i]  
 
-    print("here")
+    # print("here")
     fig.update_layout(
         title=f"Plot of Video Metrics for US Events",
         title_x = 0.5,
