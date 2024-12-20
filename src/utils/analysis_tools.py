@@ -7,7 +7,7 @@ import seaborn as sns
 from nltk.corpus import stopwords #needs 'pip install nltk'
 import nltk
 nltk.download('stopwords', quiet=True)
-import plotly.graph_objects as go
+import plotly.express as px
 from plotly.subplots import make_subplots
 
 def plot_video_stat(video_list, stat):
