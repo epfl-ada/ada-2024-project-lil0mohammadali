@@ -133,12 +133,14 @@ def sankey_plot_events(df: pd.DataFrame, save_path: str = None, show: bool = Tru
             line=dict(color="black", width=0.5),
             label=labels,
             color=node_colors,
+            hovertemplate='%{label} : %{value}<extra></extra>'
         ),
         link=dict(
             source=sources,
             target=targets,
             value=values,
             color=link_colors,
+            hovertemplate='%{source.label} -> %{target.label}: %{value}<extra></extra>'
         )
     ))
 
