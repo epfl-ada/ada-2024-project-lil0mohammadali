@@ -550,8 +550,8 @@ def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_
 
     event_type = ['geopolitical', 'environmental']
     geographical_location = ['US', 'Europe', 'Asia']
-    vid_feature_columns = ['view_count', 'total_comments', 'likes/comment', 'likes-dislikes/views']
-    subplot_titles_ = ['Views', 'Total Comments', 'Likes per Comment', '(Likes-Dislikes) <br> Divided by Views']
+    vid_feature_columns = ['view_count', 'comments/view', 'replies/comment', 'likes-dislikes/views']
+    subplot_titles_ = ['Views', 'Comment per View', 'Replies per Comment', '(Likes-Dislikes) <br> Divided by Views']
     num_subplots = 4*3
     row_num = 2
     col_num = 2
@@ -716,8 +716,8 @@ def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path
     event_type = ['geopolitical', 'environmental']
     geographical_location = ['US', 'Europe', 'Asia']
     # plot settings
-    vid_feature_columns = ['view_count', 'total_comments', 'likes/comment', 'likes-dislikes/views']
-    subplot_titles_ = ['Views', 'Total Comments', 'Likes per Comment', '(Likes-Dislikes) <br> Divided by Views']
+    vid_feature_columns = ['view_count', 'comments/view', 'replies/comment', 'likes-dislikes/views']
+    subplot_titles_ = ['Views', 'Comment per View', 'Replies per Comment', '(Likes-Dislikes) <br> Divided by Views']
     num_subplots = 4*2
     row_num = 2
     col_num = 2
