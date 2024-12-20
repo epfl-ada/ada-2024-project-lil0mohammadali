@@ -6,8 +6,7 @@ from scipy import stats
 import seaborn as sns
 from nltk.corpus import stopwords #needs 'pip install nltk'
 import nltk
-nltk.download('stopwords')
-from src.utils.keywords import add_video_live
+nltk.download('stopwords', quiet=True)
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -860,7 +859,7 @@ def create_response_metrics_df (event_metadata) -> pl.DataFrame:
     """
     public_response = event_metadata.with_columns(((pl.col("like_count") - 
                                                      pl.col("dislike_count"))/pl.col("view_count")).alias("likes-dislikes/views"))
-    public_response = public_response.with_columns((pl.col("num_comment_replies")/pl.col("num_comments")).alias("replies/comment"))
+    public_response = public_response.with_columns((pl.col("num_replies")/pl.col("num_comments")).alias("replies/comment"))
     public_response = public_response.with_columns((pl.col("num_comments")/pl.col("view_count")).alias("comments/view"))
 
     # change NAN values to 0

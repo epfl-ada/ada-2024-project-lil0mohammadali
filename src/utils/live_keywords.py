@@ -1,11 +1,8 @@
 import polars as pl
 
-keywords = [
-    ["footage"],
-]
-
 def title_contains(term):
-    pattern = f"(?i)\\b{term}\\b"  # case-insensitive, match whole word
+    pattern = f"(?i){term}"  # case-insensitive
+    # pattern = f"(?i)\\b{term}\\b"  # case-insensitive, match whole word
     return (pl.col("title").str.contains(pattern, literal=False))
 
 def build_filter_condition(terms):
@@ -21,7 +18,7 @@ def build_filter_condition(terms):
     
     # Now complex_terms is a list of lists, each sub-list is an AND group
     final_condition = pl.lit(False)
-    print("complex terms: ", complex_terms)
+    # print("complex terms: ", complex_terms)
     for group in complex_terms:
         group_condition = pl.lit(True)
         for term in group:
@@ -30,7 +27,14 @@ def build_filter_condition(terms):
     
     return final_condition
 
-def add_video_live(df):
-    final_condition = build_filter_condition(keywords)
-    df = df.with_columns((final_condition).alias("is_live"))
+def add_video_type(df, video_type: str):
+    assert video_type in ["footage", "update", "breaking"], "Invalid video type"
+    if video_type == "footage":
+        column_name = "is_footage"
+    elif video_type == "update":
+        column_name = "_update_"
+    elif video_type == "breaking":
+        column_name = "_breaking_"
+    final_condition = build_filter_condition([video_type])
+    df = df.with_columns((final_condition).alias(column_name))
     return df
