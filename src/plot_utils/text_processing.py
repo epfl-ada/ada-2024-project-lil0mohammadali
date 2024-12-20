@@ -201,14 +201,16 @@ def pie_2charts(paper):
     fig.add_trace(
         go.Pie(
             values=paper["videos"], 
-            labels=paper["category"]  
+            labels=paper["category"],
+            hovertemplate='Category: %{label} <br> Uploads: %{value} <extra></extra>', 
         ),
         row=1, col=1
     )
     fig.add_trace(
         go.Pie(
             values=paper["views"], 
-            labels=paper["category"] 
+            labels=paper["category"],
+            hovertemplate='Category: %{label} <br> Views: %{value} <extra></extra>', 
         ),
         row=1, col=2
     )
