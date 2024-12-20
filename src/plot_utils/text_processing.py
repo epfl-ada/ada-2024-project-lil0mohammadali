@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from wordcloud import WordCloud, STOPWORDS
 import base64
 import os
+import matplotlib.pyplot as plt
 
 
 #bakes the images into the html
