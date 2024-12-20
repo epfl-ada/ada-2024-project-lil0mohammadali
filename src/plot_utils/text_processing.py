@@ -1,18 +1,15 @@
 import pandas as pd
 import numpy as np
 import polars as pl
-from matplotlib import pyplot as plt
-from datetime import datetime
-import matplotlib.dates as mdates
-import importlib
+import time
 
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-import base64
-
 from wordcloud import WordCloud, STOPWORDS
-
+import base64
+import os
+import matplotlib.pyplot as plt
 
 
 #bakes the images into the html
@@ -103,6 +100,9 @@ def interactive_images(path, labels, images):
     )
     fig.show()
     fig.write_html(path)
+    file_paths = [f"img/wordclouds/fig{i}" for i in range(12)]
+    for file_path in file_paths:
+        os.remove(file_path)
 
 def plot_word_cloud(video_text, name, title):
     """
@@ -196,3 +196,26 @@ def add_subjectivity(video_df):
     return video_df.with_columns(pl.Series("subjectivity", scores))
 
 
+def pie_2charts(paper):
+    fig = make_subplots(rows=1, cols=2, 
+                        subplot_titles=('YouTube videos uploaded by category',  'YouTube videos viewed by category'), 
+                        specs=[[{"type": "pie"}, {"type": "pie"}]])
+    fig.add_trace(
+        go.Pie(
+            values=paper["videos"], 
+            labels=paper["category"],
+            hovertemplate='Category: %{label} <br> Uploads: %{value} <extra></extra>', 
+        ),
+        row=1, col=1
+    )
+    fig.add_trace(
+        go.Pie(
+            values=paper["views"], 
+            labels=paper["category"],
+            hovertemplate='Category: %{label} <br> Views: %{value} <extra></extra>', 
+        ),
+        row=1, col=2
+    )
+    fig.update_layout(margin=dict(l=30, r=100, t=20, b=20))
+    fig.show()
+    #fig.write_html("src/plots/intro_pie.html")

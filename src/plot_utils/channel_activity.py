@@ -49,11 +49,22 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
                                         f"{nb_channels} channels above cutoff"),
                         specs=[[{"type": "histogram"}, {"type": "table"}]],
                         column_widths=[0.5, 0.5])
-    fig.add_trace(go.Histogram(x=merged_df['mean_activity'], nbinsx=100, name="Activity Distribution"), row=1, col=1)
+    
+    cutoff = 4
 
+    bin_edges = np.linspace(merged_df['mean_activity'].min(), 100, 1000)
+
+    # Define an array of colors where each bin is colored based on whether it is to the left or right of the cutoff
+    colors = ['red' if (bin_edges[i] <= cutoff) else 'blue' for i in range(len(bin_edges) - 1)]
+    fig.add_trace(go.Histogram(x=merged_df['mean_activity'], nbinsx=1000, 
+                               name="Activity Distribution", 
+                               histnorm='percent',
+                               cumulative=dict(enabled=True, direction='decreasing'),
+                               marker=dict(color=colors),), row=1, col=1)
+    
     fig.update_layout(
     xaxis_title="Average nb of videos per day",  # X-axis label
-    yaxis_title="Count",  # Y-axis label
+    yaxis_title="Percentage [%]",  # Y-axis label
 )
 
     # display cutoff line
@@ -61,7 +72,7 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
         shapes=[
             dict(
                 type='line', 
-                x0=4, x1=4, 
+                x0=3.95, x1=3.95, 
                 y0=0, y1=1, 
                 yref='paper',  # The line will extend across the entire plot area
                 line=dict(color='red', dash='dot', width=2),
@@ -79,14 +90,8 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
         )
     )
 
-    # fig.add_trace(go.Scatter(
-    #     x=[None], y=[None],  
-    #     mode='lines',
-    #     name='Cutoff',  
-    #     line=dict(color='red', dash='dot')
-    # ))
-    # log scale for y-axis
-    fig.update_layout(yaxis_type="log")
+    # fig.update_layout(yaxis_type="log")
+
 
     fig.add_trace(go.Table(header=dict(values=['Channel', 'Mean activity']),
                     cells=dict(values=[filtered_df_ch['name_cc'], 
@@ -94,7 +99,8 @@ def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame
                                 align='left', 
                                 font=dict(size=12),  
                                 height=30  
-                            )), row=1, col=2)
+                            ),
+                            columnwidth=[0.8, 0.2]), row=1, col=2)
 
 
 
@@ -178,24 +184,20 @@ def add_pie_chart_for_metric_matplotlib(video_metadata: pl.DataFrame,
     # agg type is either ['geopolitical', or 'environmental']
     for i, type in enumerate(agg_type):
         for j, metric in enumerate(metrics_to_plot):
-            print(metric)
             # Filter the data for the current group
             desired_values_df = video_metadata.filter(pl.col(sort_type) == type)
             desired_values_df = desired_values_df[metric].value_counts()
             desired_values_df = desired_values_df.to_pandas()
-            print(desired_values_df)
             # Map boolean values to labels
             desired_values_df[metric] = desired_values_df[metric].map({False: f'Not {metric_name[j]}', True: metric_name[j]})
 
             # Prepare data for pie chart
             labels = desired_values_df[metric].values
             sizes = desired_values_df['count'].values
-            print(sizes)
             colors = [not_color if 'Not' in label else color_palettes[j][idx % len(color_palettes[j])] for idx, label in enumerate(labels)]
 
             # Plot pie chart
             ax = axes[j, i]  # Use the i-th subplot
-            print(i, j)
             ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
             total_count = sizes.sum()
             ax.set_title(f"% of {type} videos that are {metric_name[j]}\nTotal count: {total_count}")
@@ -204,7 +206,7 @@ def add_pie_chart_for_metric_matplotlib(video_metadata: pl.DataFrame,
     plt.tight_layout()
     plt.show()
 
-def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str = None, show: bool = True):
+def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str = None, show: bool = True, points='all'):
     """
     Plot the video metrics distinguished by event types, and plots the distribution based on region
 
@@ -301,7 +303,7 @@ def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str =
                         pointpos=-2.0,
                         # width=0.001,
                         showlegend=False,
-                        boxpoints='all' # suspectedoutliers, all, outliers
+                        boxpoints=points # suspectedoutliers, all, outliers
                         # boxmean='sd'  # Show mean and standard deviation
                     ),
                 row=row,
@@ -360,7 +362,7 @@ def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str =
         fig.write_html(save_path)
 
 
-def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str = None, show: bool = True):
+def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str = None, show: bool = True, points='all'):
     """
     Plot the video metrics discriminated by region, and plots the distribution based on events
 
@@ -477,7 +479,8 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
                             pointpos=-2.0,
                             # width=0.001,
                             showlegend=False,
-                            boxpoints='all' # suspectedoutliers, all, outliers
+                            # boxpoints='all' # suspectedoutliers, all, outliers
+                            boxpoints=points
                             # boxmean='sd'  # Show mean and standard deviation
                         ),
                     row=row,
@@ -535,7 +538,7 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
         print('saving')
         fig.write_html(save_path)
 
-def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_path: str = None, show: bool = True):
+def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_path: str = None, show: bool = True, points='all'):
     """
     Plot of metrics distinguished by event, and plots the response metrics based on region
 
@@ -548,8 +551,8 @@ def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_
 
     event_type = ['geopolitical', 'environmental']
     geographical_location = ['US', 'Europe', 'Asia']
-    vid_feature_columns = ['view_count', 'total_comments', 'likes/comment', 'likes-dislikes/views']
-    subplot_titles_ = ['Views', 'Total Comments', 'Likes per Comment', '(Likes-Dislikes) <br> Divided by Views']
+    vid_feature_columns = ['view_count', 'comments/view', 'replies/comment', 'likes-dislikes/views']
+    subplot_titles_ = ['Views', 'Comment per View', 'Replies per Comment', '(Likes-Dislikes) <br> Divided by Views']
     num_subplots = 4*3
     row_num = 2
     col_num = 2
@@ -639,7 +642,7 @@ def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_
                         pointpos=-2.0,
                         # width=0.001,
                         showlegend=False,
-                        boxpoints='all' # suspectedoutliers, all, outliers
+                        boxpoints=points # suspectedoutliers, all, outliers
                         # boxmean='sd'  # Show mean and standard deviation
                     ),
                 row=row,
@@ -700,7 +703,7 @@ def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_
         fig.write_html(save_path)
 
 
-def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path: str = None, show: bool = True):
+def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path: str = None, show: bool = True, points='all'):
     """
     Plot the video response metrics divided by regions, and plots the response metrics based on event types
 
@@ -714,8 +717,8 @@ def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path
     event_type = ['geopolitical', 'environmental']
     geographical_location = ['US', 'Europe', 'Asia']
     # plot settings
-    vid_feature_columns = ['view_count', 'total_comments', 'likes/comment', 'likes-dislikes/views']
-    subplot_titles_ = ['Views', 'Total Comments', 'Likes per Comment', '(Likes-Dislikes) <br> Divided by Views']
+    vid_feature_columns = ['view_count', 'comments/view', 'replies/comment', 'likes-dislikes/views']
+    subplot_titles_ = ['Views', 'Comment per View', 'Replies per Comment', '(Likes-Dislikes) <br> Divided by Views']
     num_subplots = 4*2
     row_num = 2
     col_num = 2
@@ -799,7 +802,7 @@ def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path
                         pointpos=-2.0,
                         # width=0.001,
                         showlegend=False,
-                        boxpoints='all', # suspectedoutliers, all, outliers
+                        boxpoints=points, # suspectedoutliers, all, outliers
                         # boxmean='sd'  # Show mean and standard deviation
                     ),
                     # go.Violin
@@ -865,27 +868,3 @@ def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path
         fig.show(scrollZoom=False)
     if save_path:
         fig.write_html(save_path)
-
-# def plot_timeseries(metadata, ):
-    
-
-if __name__ == "__main__":
-    path_df_channels_en = 'data/df_channels_en.tsv'
-
-    path_df_timeseries = 'data/df_timeseries_en.tsv'
-
-    path_yt_metadata_feather = 'data/yt_metadata_helper.feather'
-    path_yt_metadata_feather_filtered = 'data/filtered_yt_metadata_helper.feather.csv'
-
-    path_yt_metadata = 'data/yt_metadata_en.jsonl'
-    path_yt_metadata_filtered = 'data/filtered_yt_metadata.csv'
-
-    path_final_channels = 'data/final_channels.csv'
-    path_final_timeseries = 'data/final_timeseries.csv'
-    path_final_yt_metadata_feather = 'data/final_yt_metadata_helper.csv'
-    path_final_yt_metadata = 'data/final_yt_metadata.csv'
-
-    df_channels = pl.read_csv(path_final_channels)
-    df_timeseries = pl.read_csv(path_final_timeseries)
-
-    plot_channel_activity(df_channels, df_timeseries, show=True)
