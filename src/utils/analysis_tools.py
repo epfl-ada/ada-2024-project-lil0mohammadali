@@ -8,7 +8,7 @@ from nltk.corpus import stopwords #needs 'pip install nltk'
 import nltk
 nltk.download('stopwords')
 from src.utils.keywords import add_video_live
-import plotly.graph_objects as go
+import plotly.express as px
 from plotly.subplots import make_subplots
 
 def plot_video_stat(video_list, stat):
@@ -974,47 +974,51 @@ def plot_correlation_for_groups_of_events(list_of_correlations, list_of_pvalues,
         The plot of the correlation coefficients and p-values for the correlation matrix between features and metrics for different groupings of events.
     """
 
-    fig = make_subplots(rows=1, cols=2, subplot_titles=["Correlation Coefficients", "p-values"], horizontal_spacing = 0.2)
-
-    fig.update_layout(autosize=False,title=title, title_x=0.5, title_y=0.95, height=500, width=1400)
-
+    fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.2,
+                    subplot_titles=("Correlation Coefficient", "p-values"))
 
     buttons = []
 
     for i in range(len(list_of_events)):
         corr = list_of_correlations[i][len(feature_labels):,:len(feature_labels)]
         pvals = list_of_pvalues[i][len(feature_labels):,:len(feature_labels)]
-        pvals_significant = (pvals < 0.05)
-
-        fig.add_trace(go.Heatmap(z=corr, x=feature_labels, y=metric_labels, 
-                                colorscale='RdYlBu', zmid = 0, zmin=-1, zmax=1,
-                                colorbar={"title":"Correlation <br> coefficient", 'x':0.4}, 
-                                hovertemplate = " Response metric : %{y}<br> Feature : %{x}<br> Corelation coefficient: %{z:.2f}<extra></extra>"),
-                                row=1, col=1)
         
-        fig.add_trace(go.Heatmap(z=pvals, x=feature_labels, y=metric_labels, 
-                                colorscale= [
-                                [0, 'rgb(250, 50, 50)'],        #0
-                                [0, 'rgb(250, 170, 90)'],        #0
-                                [1./1000, 'rgb(250, 250, 0)'],  #100
-                                [1./100, 'rgb(160, 200, 250)'],  #1000
-                                [1./10, 'rgb(50, 50, 250)'],       #10000
-
-                                ], zmid=0.05, zmin=0, zmax=0.1,
-                                colorbar={"title":"p-value", 'tickvals': [0, 0.025, 0.05, 0.075, 0.1],},
-                                customdata = pvals_significant,
-                                hovertemplate = 'Response metric : %{y}<br>' + 'Feature : %{x}<br>' + '<b>p-value : %{z:.2f}</b><br>'+ '<b>Significant : %{customdata}</b> <extra></extra>',
-                                showlegend = False),
-                                row=1, col=2)  
-
+        fig.add_trace(px.imshow(corr, text_auto='.2f',x = feature_labels, y= metric_labels, labels = {'x':'Features', 'y':'Metrics', 'color': 'Correlation Coefficient'}).data[0], 1, 1)
+        fig.add_trace(px.imshow(pvals, text_auto='.2f',x = feature_labels, y= metric_labels, labels = {'x':'Features', 'y':'Metrics', 'color': 'p-value'}).data[0], 1, 2)
+        
         buttons.append(dict(args=[{'visible': [False]*i*2+ [True]*2 + [False]*(len(list_of_events)-i-1)*2}], label=list_of_events[i], method="update"))
 
     initial_visibility = [True]*2 + [False]*(len(list_of_events)-1)*len(list_of_events)*2
     for i in range(len(fig.data)):
-        fig.data[i].visible = initial_visibility[i]   
+        fig.data[i].visible = initial_visibility[i] 
+
+    fig.update_traces(coloraxis='coloraxis1',selector=dict(xaxis='x'))
+    fig.update_traces(coloraxis='coloraxis2',selector=dict(xaxis='x2'))
+
+    fig.update_layout(title_text=title,
+                    title_x=0.5,
+                    coloraxis=dict(colorscale='rdylbu', 
+                                    colorbar_thickness=25,
+                                    colorbar_x=0.4,
+                                    cmax = 1,
+                                    cmin = -1),
+                    coloraxis2=dict(colorscale='rdylgn',
+                                    colorbar_thickness=25,
+                                    colorbar_x=1,
+                                    cmin = 0,
+                                    cmax = 0.1,
+                                    cmid = 0.05,
+                                    reversescale = True
+                                    ),
+                    height=500,
+                    width=1400)
+
+    fig.update_xaxes(title_text="Features")
+    fig.update_yaxes(title_text="Metrics")
+
 
     if len(list_of_events) > 5 :
-        x_button = 0.75
+        x_button = 0.7
     else:
         x_button = 0.5
 
@@ -1027,11 +1031,10 @@ def plot_correlation_for_groups_of_events(list_of_correlations, list_of_pvalues,
                 showactive=True,
                 x=x_button,
                 xanchor="right",
-                y=-0.3,
+                y=-0.5,
                 yanchor="top"
             )
         ],
     )
-
     fig.show(scrollZoom=False)
     return fig
