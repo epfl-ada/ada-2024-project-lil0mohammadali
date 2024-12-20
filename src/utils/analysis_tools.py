@@ -566,7 +566,7 @@ def compute_correlation_matrix (df, how = 'pearson', plot = False, plot_title = 
     
     return corr, pvals
     
-def compute_correlation_matrix_features_and_metrics (features_and_metrics, how='pearson'):
+def compute_correlation_matrix_features_and_metrics (features_and_metrics, how='pearson', standardize = True):
     """
     Compute the correlation matrix for the features and metrics dataframes, and plot it as a heatmap.
     
@@ -580,6 +580,8 @@ def compute_correlation_matrix_features_and_metrics (features_and_metrics, how='
         The correlation coefficient to compute. Can be 'pearson' or 'spearman'. (default is 'pearson')
         The pearson coefficient is used to measure the linear correlation between two variables.
         The spearman coefficient is used to measure the monotonic relationship between two variables.
+    standardize (bool):
+        If True, the features and metrics dataframe is standardized before computing the correlation matrix.
     
     --------------------------------------------------------    
     Returns:
@@ -590,7 +592,10 @@ def compute_correlation_matrix_features_and_metrics (features_and_metrics, how='
     """
     
     #standardize the features and metrics dataframe  
-    df_standardized = stats.zscore(pd.DataFrame(features_and_metrics), axis=0).fillna(0)
+    if standardize:
+        df_standardized = stats.zscore(pd.DataFrame(features_and_metrics), axis=0).fillna(0)
+    else:
+        df_standardized = pd.DataFrame(features_and_metrics)
     
     if how == 'pearson':
         corr = np.ones((df_standardized.shape[1], df_standardized.shape[1]))
@@ -883,7 +888,7 @@ def create_response_metrics_df (event_metadata, num_comments):
     
     return response_metrics
 
-def compute_correlation_for_group (features_and_metrics, how_to_group, features, metrics):
+def compute_correlation_for_group (features_and_metrics, how_to_group, features, metrics, standardize = True):
     """
     Compute the correlation matrix for the features and metrics dataframe for a given grouping type.
     
@@ -897,6 +902,8 @@ def compute_correlation_for_group (features_and_metrics, how_to_group, features,
         A list of the features to include in the correlation matrix.
     metrics (list):
         A list of the response metrics to include in the correlation matrix.
+    standardize (bool):
+        If True, the features and metrics dataframe is standardized before computing the correlation matrix.
     
     --------------------------------------------------------    
     Returns:
@@ -923,7 +930,7 @@ def compute_correlation_for_group (features_and_metrics, how_to_group, features,
             event_features_and_metrics = features_and_metrics.filter(pl.col(how_to_group) == event)[features + metrics]
             
             # compute the correlation matrix and p-values for the videos and response metrics
-            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics)
+            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics, standardize = standardize)
             correlations.append(corr)
             pvalues.append(pvals)
             
@@ -933,7 +940,7 @@ def compute_correlation_for_group (features_and_metrics, how_to_group, features,
             event_features_and_metrics = features_and_metrics.filter(pl.col(how_to_group) == event_type)[features + metrics]
             
             # compute the correlation matrix and p-values for the videos and response metrics
-            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics)
+            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics, standardize = standardize)
             correlations.append(corr)
             pvalues.append(pvals)
             
@@ -943,7 +950,7 @@ def compute_correlation_for_group (features_and_metrics, how_to_group, features,
             event_features_and_metrics = features_and_metrics.filter(pl.col(how_to_group) == region)[features + metrics]
             
             # compute the correlation matrix and p-values for the videos and response metrics
-            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics)
+            corr, pvals = compute_correlation_matrix_features_and_metrics(event_features_and_metrics, standardize = standardize)
             correlations.append(corr)
             pvalues.append(pvals)
     
@@ -1008,7 +1015,9 @@ def plot_correlation_for_groups_of_events(list_of_correlations, list_of_pvalues,
                                     cmin = 0,
                                     cmax = 0.1,
                                     cmid = 0.05,
-                                    reversescale = True
+                                    reversescale = True,
+                                    colorbar_tickvals = [0,0.025, 0.05, 0.075, 0.1],
+                                    colorbar_ticktext = ['0', '0.025', '0.05', '0.075', '>=0.1']
                                     ),
                     height=500,
                     width=1400)
