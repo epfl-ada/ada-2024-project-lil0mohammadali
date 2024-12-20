@@ -538,7 +538,7 @@ def plot_video_metrics_event_region(video_metadata: pl.DataFrame, save_path: str
         print('saving')
         fig.write_html(save_path)
 
-def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_path: str = None, show: bool = True):
+def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_path: str = None, show: bool = True, points='all'):
     """
     Plot of metrics distinguished by event, and plots the response metrics based on region
 
@@ -642,7 +642,7 @@ def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_
                         pointpos=-2.0,
                         # width=0.001,
                         showlegend=False,
-                        boxpoints='all' # suspectedoutliers, all, outliers
+                        boxpoints=points # suspectedoutliers, all, outliers
                         # boxmean='sd'  # Show mean and standard deviation
                     ),
                 row=row,
@@ -703,7 +703,7 @@ def plot_video_metrics_response_event_type(comment_metadata: pl.DataFrame, save_
         fig.write_html(save_path)
 
 
-def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path: str = None, show: bool = True):
+def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path: str = None, show: bool = True, points='all'):
     """
     Plot the video response metrics divided by regions, and plots the response metrics based on event types
 
@@ -802,7 +802,7 @@ def plot_video_metrics_response_region(comment_metadata: pl.DataFrame, save_path
                         pointpos=-2.0,
                         # width=0.001,
                         showlegend=False,
-                        boxpoints='all', # suspectedoutliers, all, outliers
+                        boxpoints=points, # suspectedoutliers, all, outliers
                         # boxmean='sd'  # Show mean and standard deviation
                     ),
                     # go.Violin
