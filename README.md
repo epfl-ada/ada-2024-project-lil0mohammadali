@@ -30,10 +30,11 @@ Below is a figure describing at a high level the filtering of the channels with 
 - **Filter out relevant comments using VoI**   
     Once we had the VoI we could filter the comments datasets using the video ID to obtain the metrics of number of comments and number of comment-replies for each VoI.
 
-#### Analysis
+## Analysis
 
 The analysis is decomposed into two sections: 1. How does US News report on different events based on category and location? (i.e. studying the reporting side) 2. How does the public respond to events and specific video formats? 
 
+### Video metrics
 To answer the first question, we look at videos related to each event, getting statistics for: 
 
     - video duration
@@ -50,7 +51,7 @@ The video duration was taken directly from the YouNiverse dataset. The type of v
 
 We can see in our analysis that for the US and Asia, subjectivity seems to be on average significantly higher for geopolitical events, whereas we don’t see a massive difference in European events. Video duration seems to be longer for geopolitical events accross the board, potentially reflecting that such events need more context and insights in order to understand the situation. Finally, in geopolitics, US-related events present higher subjectivity than Europe and Asia, as for environmental ones, Europe presents the highest subjectivity in reporting.
 
-
+### Public response
 To answer the second question, we look at data relating to the public response to videos.  To do so, and after considering numerous options, we landed on the following four:
 
     - views
@@ -66,7 +67,7 @@ We would like to find correlations between the statistic of the first question a
 
 Based on the metrics of the public's response we could classify the reaction into two main categories: relatively high view count and low comments/replies to comments, and average views with high comments/replies to comments. The first type would reflect virality and high reach of the video, while the second indicates that the video prompts strong user ungagement, encouraging discussions within the public. We could thereafter determine what format of videos result in high virality vs discussions, and news channels could adapt their videos according to the desired outcome. Like/dislike ratio could also be used to try determining how to potentially minimize division among the public (indicated by a ratio close to 1). 
 
-## Proposed timeline and organization within the team
+## Timeline and organization within the team
 #### Week 1 (26.10.-01.11.):
 - Find out how to treat big dataframes (🐋Lisa)
 - Filter channels by category (🐋Lisa)
