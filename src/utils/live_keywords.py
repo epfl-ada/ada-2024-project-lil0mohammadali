@@ -1,12 +1,9 @@
 import polars as pl
 
 keywords = [
-    # ["footage"],
-    # ["harvey"],
-    # ["hurricane"],
-    # ["news"],
+    ["footage"],
     # ["update"],
-    ["breaking"]
+    # ["breaking"]
 ]
 
 def title_contains(term):
@@ -38,5 +35,5 @@ def build_filter_condition(terms):
 
 def add_video_live(df):
     final_condition = build_filter_condition(keywords)
-    df = df.with_columns((final_condition).alias("_breaking_"))
+    df = df.with_columns((final_condition).alias("is_footage"))
     return df
