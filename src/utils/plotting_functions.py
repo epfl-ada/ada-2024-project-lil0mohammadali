@@ -236,18 +236,18 @@ titles_conflict = [
     # Geopolitical Conflicts / Armed Conflicts (US)
     "Mosul Offensive (2016-2017) - Iraq",
     "Battle of Kobani (2014-2015) - Syria",
-    "Battle of Raqqa (June - October 2017) - Syria",
+    "Battle of Raqqa (Jun - Oct 2017) - Syria",
     "Kunduz City Attack (2015) - Afghanistan",
     "Battle of Sirte (2016) - Libya",
     
     # Geopolitical Conflicts / Armed Conflicts (Asia)
-    "Pulwama attack and Balakot Airstrikes, kashmir conflict (February 2019) - India / Pakistan",
-    "Syrian Civil War, Aleppo Offensive (2016))",
-    "Yemeni Civil War , battle of Hudayah (June - December 2018 )",
+    "Pulwama attack & Balakot Airstrikes (Feb 2019) - India/Pakistan",
+    "Syrian Civil War, Aleppo Offensive (2016)",
+    "Yemeni Civil War, battle of Hudayah (Jun - Dec 2018)",
     
     # Geopolitical Conflicts / Armed Conflicts (Europe)
-    "Crimea Annexation and Conflict in Eastern Ukraine (2014)",
-    "Nagorno-Karabakh Conflicts (Clashes (2016)) - Armenia-Azerbaijan",
+    "Crimea Annexation & Conflict in Eastern Ukraine (2014)",
+    "Nagorno-Karabakh Clashes (2016) - Armenia-Azerbaijan",
 ]
 
 def title_or_desc_contains(term):
@@ -276,7 +276,7 @@ def build_filter_condition(terms):
     return final_condition
 
 # Assuming filtered_df_metadata, list_of_lists_environment, list_of_lists_conflict, titles_environment, titles_conflict, event_dates, crop_time, generate, and grouping_mode are defined
-def plot_update_freq_v5(index, filtered_df_metadata, all_plots=False, grouping_mode="daily", event_type=None, crop_time=False, generate = False): # added argument crop_time
+def plot_update_freq(filtered_df_metadata, grouping_mode="daily", event_type=None, crop_time=False, generate = False, save_html = None): # added argument crop_time
 
     event_dates = [
             [date(2017, 8, 1), date(2018, 7, 30)],  # Hurricane Harvey (Aug-Sep 2017)
@@ -384,20 +384,26 @@ def plot_update_freq_v5(index, filtered_df_metadata, all_plots=False, grouping_m
                 date_counts = event_metadata.group_by("upload_date").count().sort("upload_date")
             case "weekly":
                 date_counts = (event_metadata
-                               .with_columns(pl.col("upload_date").dt.truncate("1w").alias("upload_date"))
-                               .group_by("upload_date")
-                               .count()
-                               .sort("upload_date"))
+                                .with_columns(pl.col("upload_date").dt.truncate("1w").alias("upload_date"))
+                                .group_by("upload_date")
+                                .count()
+                                .sort("upload_date"))
             case "monthly":
                 date_counts = (event_metadata
-                               .with_columns(pl.col("upload_date").dt.truncate("1mo").alias("upload_date"))
-                               .group_by("upload_date")
-                               .count()
-                               .sort("upload_date"))
-
+                                .with_columns(pl.col("upload_date").dt.truncate("1mo").alias("upload_date"))
+                                .group_by("upload_date")
+                                .count()
+                                .sort("upload_date"))
+        # print(date_counts)
         # Add bar trace to the figure
         fig.add_trace(
-            go.Bar(x=date_counts["upload_date"], y=date_counts["count"], name=title, visible=(idx == 0))
+            go.Bar(x=date_counts["upload_date"], 
+                   y=date_counts["count"], 
+                   name=title, 
+                   visible=(idx == 0),
+                   marker=dict(color='rgba(0, 0, 139, 1)'),  # Darker color
+                #    width=5
+            )
         )
 
         # Create a button for each event
@@ -409,21 +415,28 @@ def plot_update_freq_v5(index, filtered_df_metadata, all_plots=False, grouping_m
         ))
 
     # Update layout with dropdown menu
+    title = titles[0]
     fig.update_layout(
+        title=f"Upload frequency for videos related to {title}",  
+        title_x=0.5,
+        title_xanchor='center',
+        title_font=dict(size=14),
+        yaxis_title="Uploads per Day",
         updatemenus=[{
             "buttons": buttons,
-            "direction": "down",
+            "direction": "up",
             "showactive": True,
             "x": 0.17,
             "xanchor": "left",
-            "y": 1.15,
+            "y": -0.1,
             "yanchor": "top"
         }],
         height=600,
         width=800,
-        title_text="Upload frequency for videos related to various events",
         showlegend=False
     )
 
     # Show the plot
     fig.show()
+    if save_html:
+        fig.write_html(save_html)
