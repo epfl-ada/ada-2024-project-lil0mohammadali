@@ -30,11 +30,11 @@ Below is a figure describing at a high level the filtering of the channels with 
 - **Filter out relevant comments using VoI**   
     Once we had the VoI we could filter the comments datasets using the video ID to obtain the metrics of number of comments and number of comment-replies for each VoI.
 
-## Analysis
+### Analysis
 
 The analysis is decomposed into two sections: 1. How does US News report on different events based on category and location? (i.e. studying the reporting side) 2. How does the public respond to events and specific video formats? 
 
-### Video metrics
+## Video metrics
 To answer the first question, we look at videos related to each event, getting statistics for: 
 
     - video duration
@@ -51,7 +51,7 @@ The video duration was taken directly from the YouNiverse dataset. The type of v
 
 We can see in our analysis that for the US and Asia, subjectivity seems to be on average significantly higher for geopolitical events, whereas we don’t see a massive difference in European events. Video duration seems to be longer for geopolitical events accross the board, potentially reflecting that such events need more context and insights in order to understand the situation. Finally, in geopolitics, US-related events present higher subjectivity than Europe and Asia, as for environmental ones, Europe presents the highest subjectivity in reporting.
 
-### Public response
+## Public response
 To answer the second question, we look at data relating to the public response to videos.  To do so, and after considering numerous options, we landed on the following four:
 
     - views
@@ -61,13 +61,12 @@ To answer the second question, we look at data relating to the public response t
 
 The choice of the first metric is quite straightforward. For the second metric we tried to find a measure for the general desire of the user to see more of the same or similar content, and a dislike as a desire not to. Taking the difference gives us the net general interest of the users in this content. Given that likes and dislikes grow with views, we normalize this difference by view count. For the same reason, we normalize the number of comments by views to obtain the third metric. This enables us to assess the extent to which a particular video entices people to express their views in the videos’ content in the comments. And the average replies per comment is a metric reflecting how much the video encourages discussion.
 
-????????????? replace everything after this
+Based on these metrics we plotted the correlations between the video features and the responses. Since quite a few of them had significant correlations we made linear regression model to see how well the video features explain the variance we see in response.
 
-We would like to find correlations between the statistic of the first question and those of the public's response (using t and f tests to see the significance of correlation), potentially finding meaningful patterns. The goal of this is provide tips for useful features that news companies and NGO's can use to better engage users. 
+The linear regression model has low R^2 scores that indicate that only very little of the variance can be explaind with the video metrics. 
+While that is disappinting, it makes sense since we dont have acess ot siginificant video features such as tumbnails. The only prominent features are live footage is linked to more discussion as measured by comments/views and replies/comments for geopolitical events, higher capitalisation ratio is linked to overall higher discussions and engagement independent of event type and for environmental events high channel activity is linked to a lower public resopnse on all metrics which together with how much more these events are reported on could hint at a certain oversatureation the topic and a fading publich interest.
 
-Based on the metrics of the public's response we could classify the reaction into two main categories: relatively high view count and low comments/replies to comments, and average views with high comments/replies to comments. The first type would reflect virality and high reach of the video, while the second indicates that the video prompts strong user ungagement, encouraging discussions within the public. We could thereafter determine what format of videos result in high virality vs discussions, and news channels could adapt their videos according to the desired outcome. Like/dislike ratio could also be used to try determining how to potentially minimize division among the public (indicated by a ratio close to 1). 
-
-## Timeline and organization within the team
+## Contributions within the Team
 #### Week 1 (26.10.-01.11.):
 - Find out how to treat big dataframes (🐋Lisa)
 - Filter channels by category (🐋Lisa)
@@ -106,7 +105,7 @@ Based on the metrics of the public's response we could classify the reaction int
 - website (🦖Leonie)
 - jypiter notebook (🐋Lisa)
 - linear regression model (🦔Jad)
-- writing (🦔Jad)
+- writing (🦔Jad & 🐦Jeffrey)
 
 
 
