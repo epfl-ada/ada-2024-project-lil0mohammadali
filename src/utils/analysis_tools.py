@@ -6,7 +6,7 @@ from scipy import stats
 import seaborn as sns
 from nltk.corpus import stopwords #needs 'pip install nltk'
 import nltk
-
+nltk.download('stopwords')
 from src.utils.keywords import add_video_live
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
