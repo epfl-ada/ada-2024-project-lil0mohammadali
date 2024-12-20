@@ -307,18 +307,18 @@ titles_conflict = [
     # Geopolitical Conflicts / Armed Conflicts (US)
     "Mosul Offensive (2016-2017) - Iraq",
     "Battle of Kobani (2014-2015) - Syria",
-    "Battle of Raqqa (Jun - Oct 2017) - Syria",
+    "Battle of Raqqa (June - October 2017) - Syria",
     "Kunduz City Attack (2015) - Afghanistan",
     "Battle of Sirte (2016) - Libya",
     
     # Geopolitical Conflicts / Armed Conflicts (Asia)
-    "Pulwama attack & Balakot Airstrikes (Feb 2019) - India/Pakistan",
-    "Syrian Civil War, Aleppo Offensive (2016)",
-    "Yemeni Civil War, battle of Hudayah (Jun - Dec 2018)",
+    "Pulwama attack and Balakot Airstrikes, kashmir conflict (February 2019) - India / Pakistan",
+    "Syrian Civil War, Aleppo Offensive (2016))",
+    "Yemeni Civil War , battle of Hudayah (June - December 2018 )",
     
     # Geopolitical Conflicts / Armed Conflicts (Europe)
-    "Crimea Annexation & Conflict in Eastern Ukraine (2014)",
-    "Nagorno-Karabakh Clashes (2016) - Armenia-Azerbaijan",
+    "Crimea Annexation and Conflict in Eastern Ukraine (2014)",
+    "Nagorno-Karabakh Conflicts (Clashes (2016)) - Armenia-Azerbaijan",
 ]
 
 
