@@ -6,9 +6,8 @@ from scipy import stats
 import seaborn as sns
 from nltk.corpus import stopwords #needs 'pip install nltk'
 import nltk
-nltk.download('stopwords')
-from src.utils.keywords import add_video_live
-import plotly.express as px
+nltk.download('stopwords', quiet=True)
+import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 def plot_video_stat(video_list, stat):
@@ -835,16 +834,13 @@ def create_video_features_dataframe (event_metadata, feather_metadata):
     Returns:
     vid_features: polars.DataFrame
         The dataframe containing the features for each video in the event_metadata dataframe
-    """
-    
+    """    
     #select the relevant columns to create the vid_features dataframe
-    vid_features = event_metadata[['display_id','channel_id', 'event_type', 'region', 'event',  'duration', 'is_live']]
+    vid_features = event_metadata[['display_id']]
 
     activity = get_channels_activity(event_metadata, feather_metadata)
     vid_features = vid_features.join(activity, on='display_id', how='inner')
 
-    vid_features = vid_features.drop('channel_id')
-    
     #compute the capitalization ratio of the title for each video
     titles = event_metadata[['display_id','title']]
     ratio = cap_ratio(titles, 'title')
@@ -853,40 +849,27 @@ def create_video_features_dataframe (event_metadata, feather_metadata):
     
     return vid_features
 
-def create_response_metrics_df (event_metadata, num_comments):
+def create_response_metrics_df (event_metadata) -> pl.DataFrame:
     """
     This function creates a dataframe containing the public response metrics for each video in the event_metadata dataframe.
-    The public response metrics are the number of likes, dislikes, views, comments and the ratio of likes to dislikes.
-    The function also removes the rows with infinite like/dislike ratio and sets the NaN values to 1.
+    The public response metrics include the total number of comments, the ratio of likes to dislikes, the ratio of replies to comments, and the ratio of likes to comments.
     
     Parameters:
     event_metadata: polars.DataFrame
         The dataframe containing the metadata of the videos in the event
-    num_comments: polars.DataFrame
-        The dataframe containing the number of comments for each video in the event
         
     Returns:
-    response_metrics: polars.DataFrame
-        The dataframe containing the public response metrics for each video in the event_metadata dataframe
+    public_response: polars.DataFrame
+        The event_metadata dataframe with the public response metrics added
     """
+    public_response = event_metadata.with_columns(((pl.col("like_count") - 
+                                                     pl.col("dislike_count"))/pl.col("view_count")).alias("likes-dislikes/views"))
+    public_response = public_response.with_columns((pl.col("num_replies")/pl.col("num_comments")).alias("replies/comment"))
+    public_response = public_response.with_columns((pl.col("num_comments")/pl.col("view_count")).alias("comments/view"))
 
-    #join the metadata with the number of comments to create the response metrics dataframe
-    response_metrics = event_metadata[['display_id','like_count','dislike_count','view_count']].join(num_comments, on='display_id', how='inner')
-
-    #deal with importing issues with the 'view_count' column
-    response_metrics = response_metrics.with_columns(new_view_count = pl.col('view_count').str.strip_suffix('\r').str.strip_suffix('.0').cast(pl.Int64))
-    response_metrics = response_metrics.drop('view_count').rename({'new_view_count':'view_count'})
-
-    #add a column for likes/dislikes ratio
-    response_metrics = response_metrics.with_columns((pl.col('like_count')/pl.col('dislike_count')).alias('likes/dislikes'))
-    #drop the like_count and dislike_count columns since we have the ratio
-    response_metrics = response_metrics.drop('like_count','dislike_count')
-
-    #remove the entries with infinite like/dislike ratio, and set the NaN values to 1 (because they correspond to videow with no likes and no dislikes)
-    response_metrics = response_metrics.with_columns(pl.col('likes/dislikes').replace(np.NaN, 1))
-    response_metrics = response_metrics.filter(pl.col('likes/dislikes') != np.inf)
-    
-    return response_metrics
+    # change NAN values to 0
+    public_response = public_response.fill_nan(0)
+    return public_response
 
 def compute_correlation_for_group (features_and_metrics, how_to_group, features, metrics, standardize = True):
     """
