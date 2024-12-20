@@ -5,6 +5,7 @@ from plotly.subplots import make_subplots
 from ..utils.keywords import get_event_metadata
 from ..utils.analysis_tools import create_video_features_dataframe
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def plot_channel_activity(df_channels: pl.DataFrame, df_timeseries: pl.DataFrame, 
@@ -138,6 +139,72 @@ def add_pie_chart_for_metric(fig: go.Figure,
             col=column+i,
         )
     return fig
+
+def add_pie_chart_for_metric_matplotlib(video_metadata: pl.DataFrame, 
+                                        sort_type: str,
+                                        agg_type: list):
+    """
+    Pie chart of percent variables using Matplotlib.
+
+    Args:
+        video_metadata: Polars DataFrame containing data.
+        metrics_to_plot: The data we want to plot (e.g., 'breaking', 'footage', 'update').
+        metric_name: Name to use for legend (e.g., 'Breaking News').
+        agg_type: List of elements to group by (e.g., regions or events).
+        metrics_to_group_by: List of the elements group by (e.g., 'region', 'event').
+        sort_type: either 'region' or 'event_type'
+    """
+
+
+    # # Create a figure with subplots
+    # fig, axes = plt.subplots(row, col, figsize=(12, 6))
+    # axes = axes.flatten()  # Flatten axes for easy indexing
+    event_type = ['geopolitical', 'environmental']
+    geographical_location = ['US', 'Europe', 'Asia']
+    metrics_to_plot = ['_breaking_', '_update_', 'is_footage']
+    metric_name = ['Breaking', 'Update', 'Footage']
+
+    rows = len(metrics_to_plot)
+    cols = len(agg_type)
+    fig, axes = plt.subplots(rows, cols, figsize=(10, 10))  # 3 rows, 3 columns
+
+    color_palettes = [
+        ['#ff9999','#66b3ff','#99ff99'],
+        ['#ffcc99','#c2c2f0','#ffb3e6'],
+        ['#c4e17f','#76d7c4','#ff6f61']
+    ]
+
+    not_color = '#d3d3d3'  # Light gray
+
+
+    # agg type is either ['geopolitical', or 'environmental']
+    for i, type in enumerate(agg_type):
+        for j, metric in enumerate(metrics_to_plot):
+            print(metric)
+            # Filter the data for the current group
+            desired_values_df = video_metadata.filter(pl.col(sort_type) == type)
+            desired_values_df = desired_values_df[metric].value_counts()
+            desired_values_df = desired_values_df.to_pandas()
+            print(desired_values_df)
+            # Map boolean values to labels
+            desired_values_df[metric] = desired_values_df[metric].map({False: f'Not {metric_name[j]}', True: metric_name[j]})
+
+            # Prepare data for pie chart
+            labels = desired_values_df[metric].values
+            sizes = desired_values_df['count'].values
+            print(sizes)
+            colors = [not_color if 'Not' in label else color_palettes[j][idx % len(color_palettes[j])] for idx, label in enumerate(labels)]
+
+            # Plot pie chart
+            ax = axes[j, i]  # Use the i-th subplot
+            print(i, j)
+            ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
+            total_count = sizes.sum()
+            ax.set_title(f"% of {type} videos that are {metric_name[j]}\nTotal count: {total_count}")
+
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+    plt.show()
 
 def plot_video_metrics_event_type(video_metadata: pl.DataFrame, save_path: str = None, show: bool = True):
     """
