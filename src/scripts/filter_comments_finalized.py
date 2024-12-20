@@ -1,5 +1,4 @@
-# # load yt metadata in chunks and filter for videos contained in filtered_df_ch
-# # df.filter(pl.col("categories") == "News & Politics") to filter for categories of videos instead
+# load yt metadata in chunks and filter for videos contained in filtered_df_ch
 import polars as pl
 import pandas as pd
 import time 
@@ -8,6 +7,16 @@ import shutil
 
 
 def filter_relevant_comments(directory, video_metadata_file):
+    """
+    Filter the comments files by the VoI before the event filtering and saves it to
+    a new file in the same directory.
+
+    Args:
+    directory: str
+        The directory containing the comment files
+    video_metadata_file: str
+        The file containing the video metadata
+    """
     # iterate through the comment files 
     tsv_gz_files = []
     # directory = 'comments_line_separated'
@@ -67,6 +76,14 @@ def filter_relevant_comments(directory, video_metadata_file):
         print(f"Total processing time for file {os.path.basename(file_path)}: {int(hours)} hours, {int(minutes)} minutes, {seconds:.2f} seconds")
 
 def combine_csv_files_polars(input_directory, output_file):
+    """
+    Combines all the filtered comment files into a single CSV file.
+    
+    Args:
+    input_directory: str
+        The directory containing the filtered comment files
+    output_file: str
+        The file to save the combined CSV file"""
     combined_data = []
 
     for root, _, files in os.walk(input_directory):
@@ -83,6 +100,9 @@ def combine_csv_files_polars(input_directory, output_file):
     print(f"Combined CSV saved to: {output_file}")
 
 def update_csv_header(input_file, output_file, replacement_line):
+    """
+    Adds a header to the combined CSV file.
+    """
     from_file = open(input_file, 'r')
     to_file = open(output_file, 'w')
 
@@ -93,6 +113,16 @@ def update_csv_header(input_file, output_file, replacement_line):
 
 
 def write_comments_statistics_csv(video_metadata_file, filtered_comments_file):
+    """"
+    Writes a CSV file containing the statistics of the comments for each video.
+    They are the number of comments, total likes, and number of replies.
+    The stats are saved in a file called 'data/comment_stats.csv'.
+    
+    Args:
+    video_metadata_file: str
+        The file containing the video metadata, especially the display_id
+    filtered_comments_file: str
+        The file containing the filtered comments"""
 
     video_metadata_df = pl.read_csv(video_metadata_file)
 
